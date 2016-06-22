@@ -3,8 +3,21 @@
 
 #define NR_WP 32
 
+
 static WP wp_pool[NR_WP];
 static WP *head, *free_;
+
+static void check_wp() {
+    int sum = 0;
+    WP *p;
+    for(p = head; p != NULL; p = p->next) {
+        sum += p->NO;
+    }
+    for(p = free_; p != NULL; p = p->next) {
+        sum += p->NO;
+    }
+    Assert(sum == (1 + NR_WP) * NR_WP / 2, "Watchpoint pool implementation error\n");
+}
 
 void init_wp_pool() {
 	int i;
@@ -17,6 +30,7 @@ void init_wp_pool() {
 
 	head = NULL;
 	free_ = wp_pool;
+    check_wp();
 }
 
 WP* new_wp() {
@@ -27,6 +41,7 @@ WP* new_wp() {
 
     p->next = head;
     head = p;
+    check_wp();
     return p;
 }
 
@@ -45,6 +60,7 @@ bool free_wp(int number) {
     p2->hit_times = 0;
     p2->next = free_;
     free_ = p2;
+    check_wp();
     return true;
 }
 

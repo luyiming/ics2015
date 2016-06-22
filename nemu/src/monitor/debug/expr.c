@@ -25,8 +25,8 @@ static struct rule {
 	{ " +",	            NOTYPE },   // spaces
 	{ "==",             EQ },       // equal
     { "(0x)?[0-9]+",    NUM },      // number
-    { "\\$[a-zA-Z]+",   REG },      // register
-    { "[^$][a-zA-Z]+",  VAR },      // variable
+    { "%[a-zA-Z]+",     REG },      // register
+    { "[^%][a-zA-Z]+",  VAR },      // variable
     { "\\(",            '('},
     { "\\)",            ')'},
 	{ "\\+",            '+'},				
@@ -96,7 +96,7 @@ static bool make_token(char *e) {
                         nr_token++;
                         break;
                     }
-                    case REG:   //remove prefix $
+                    case REG:   //remove prefix %
                     {
                         tokens[nr_token].type = REG; 
                         strncpy(tokens[nr_token].str, substr_start + 1, substr_len - 1);
@@ -107,7 +107,6 @@ static bool make_token(char *e) {
                     case NOTYPE: break;
 					default: tokens[nr_token++].type = rules[i].token_type; break;
 				}
-
 				break;
 			}
 		}
@@ -204,6 +203,8 @@ static int eval(int p, int q) {
                     return value;
                 }
             }
+            if(strcmp(tokens[p].str, "eip") == 0)
+                return cpu.eip;
             printf("undefined register\n");
             return -1;
         }

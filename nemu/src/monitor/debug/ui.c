@@ -138,9 +138,10 @@ static int cmd_x(char *args) {
 static int cmd_p(char *args) {
     if(args) {
         bool success = false;
-        uint32_t value = expr(args, &success);
-        if(success)
-            printf("%u\n", value);
+        int value = expr(args, &success);
+        if(success) {
+            printf("0x%x\n", value);
+        }
         else
             printf("bad expression\n");
     }

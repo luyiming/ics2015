@@ -163,11 +163,9 @@ static int check_parentheses(int p, int q) {
 static bool op_less_equal(int p, int q) {
     int pt = tokens[p].type;
     int qt = tokens[q].type;
-    if(qt == NOP)
+    if(qt == NOP || qt == NEG || qt == DEREF)
         return true;
-    if((pt == NEG || pt == DEREF) && (qt == '+' || qt == '-' || qt == '*' || qt == '/'))
-        return false;
-    else if((pt == '*' || pt == '/') && (qt == '+' || qt == '-'))
+    if((pt == '*' || pt == '/') && (qt == '+' || qt == '-'))
         return false;
     else
         return true;

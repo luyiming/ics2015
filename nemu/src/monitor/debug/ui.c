@@ -116,7 +116,7 @@ static int cmd_info(char *args) {
     else if(strcmp(arg, "r") == 0) {
         int i;
         for(i = R_EAX; i <= R_EDI; i ++) {
-            printf("%s\t\t0x%08x\n", regsl[i], reg_l(i));
+            printf("%s\t\t0x%8x\n", regsl[i], reg_l(i));
         }
         printf("eip\t\t0x%08x\n", cpu.eip);
     }

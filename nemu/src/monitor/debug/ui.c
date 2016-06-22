@@ -55,6 +55,7 @@ static int cmd_help(char *args);
 static int cmd_si(char *args);
 static int cmd_info(char *args);
 static int cmd_x(char *args);
+static int cmd_p(char *args);
 
 static struct {
 	char *name;
@@ -67,6 +68,7 @@ static struct {
     { "si", "Step one instruction exactly.\n", cmd_si },
     { "info", "Show information\n", cmd_info },
     { "x", "Examine memory\n", cmd_x },
+    { "p", "Print expression\n", cmd_p },
 
 	/* TODO: Add more commands */
 
@@ -116,7 +118,7 @@ static int cmd_info(char *args) {
     else if(strcmp(arg, "r") == 0) {
         int i;
         for(i = R_EAX; i <= R_EDI; i ++) {
-            printf("%s\t\t0x%8x\n", regsl[i], reg_l(i));
+            printf("%s\t\t0x%08x\n", regsl[i], reg_l(i));
         }
         printf("eip\t\t0x%08x\n", cpu.eip);
     }
@@ -130,6 +132,18 @@ static int cmd_info(char *args) {
 }
 
 static int cmd_x(char *args) {
+    return 0;
+}
+
+static int cmd_p(char *args) {
+    if(args) {
+        bool success = false;
+        uint32_t value = expr(args, &success);
+        if(success)
+            printf("%u\n", value);
+        else
+            printf("bad expression\n");
+    }
     return 0;
 }
 

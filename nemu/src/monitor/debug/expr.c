@@ -7,7 +7,7 @@
 #include <regex.h>
 
 enum {
-	NOTYPE = 256, EQ
+	NOTYPE = 256, EQ, NUM, REG, VAR
 
 	/* TODO: Add more token types */
 
@@ -22,9 +22,17 @@ static struct rule {
 	 * Pay attention to the precedence level of different rules.
 	 */
 
-	{" +",	NOTYPE},				// spaces
-	{"\\+", '+'},					// plus
-	{"==", EQ}						// equal
+	{ " +",	            NOTYPE },   // spaces
+	{ "==",             EQ },       // equal
+    { "(0x)?[0-9]+",    NUM },      // number
+    { "\\$[a-zA-Z]+",   REG },      // register
+    { "[^$][a-zA-Z]+",  VAR },      // variable
+    { "\\(",            '('},
+    { "\\)",            ')'},
+	{ "\\+",            '+'},				
+	{ "-",              '-'},				
+	{ "\\*",            '*'},				
+	{ "/",              '/'},					
 };
 
 #define NR_REGEX (sizeof(rules) / sizeof(rules[0]) )
@@ -50,10 +58,10 @@ void init_regex() {
 
 typedef struct token {
 	int type;
-	char str[32];
+	char str[64];
 } Token;
 
-Token tokens[32];
+Token tokens[64];
 int nr_token;
 
 static bool make_token(char *e) {
@@ -77,9 +85,27 @@ static bool make_token(char *e) {
 				 * to record the token in the array ``tokens''. For certain 
 				 * types of tokens, some extra actions should be performed.
 				 */
+                Assert(nr_token < 64, "tokens out of range");
 
 				switch(rules[i].token_type) {
-					default: panic("please implement me");
+                    case NUM:
+                    {
+                        tokens[nr_token].type = NUM; 
+                        strncpy(tokens[nr_token].str, substr_start, substr_len);
+                        tokens[nr_token].str[substr_len + 1] = '\0';
+                        nr_token++;
+                        break;
+                    }
+                    case REG:   //remove prefix $
+                    {
+                        tokens[nr_token].type = REG; 
+                        strncpy(tokens[nr_token].str, substr_start + 1, substr_len - 1);
+                        tokens[nr_token].str[substr_len] = '\0';
+                        nr_token++;
+                        break;
+                    }
+                    case NOTYPE: break;
+					default: tokens[nr_token++].type = rules[i].token_type; break;
 				}
 
 				break;
@@ -95,14 +121,118 @@ static bool make_token(char *e) {
 	return true; 
 }
 
+static int check_parentheses(int p, int q) {
+    // return value:
+    // 0  match
+    // -1 bad expression
+    // 1  good expression, not match
+    int st[64], top = 0;
+    (void)st;
+    int i;
+    for(i = p; i <= q; i ++) {
+        if(tokens[i].type == '(') {
+            st[top++] = '(';
+        }
+        else if(tokens[i].type == ')') {
+            if(top == 0)
+                return -1;  // lack left parenthesis
+            top--;
+        }
+    }
+    if(top != 0)
+        return -1;  //lack right parenthesis
+    else if(tokens[p].type == '(' && tokens[q].type == ')')
+        return 0;
+    else
+        return 1;
+}
+
+static bool op_less_equal(int lhs, int rhs) {
+    if((lhs == '*' || lhs == '/') && (rhs == '+' || rhs == '-'))
+        return false;
+    else
+        return true;
+}
+
+static int eval(int p, int q) {
+    if(p > q) {
+                /* Bad expression */
+        return 0;
+    }
+    else if(p == q) { 
+    /* Single token.
+     *       * For now this token should be a number. 
+     *               * Return the value of the number.
+     *                       */ 
+        int value = 0;
+        if(tokens[p].type == NUM) {
+            if(strncmp(tokens[p].str, "0x", 2) == 0) { // Hex
+                int i, len = strlen(tokens[p].str);
+                for(i = 2; i < len; i ++) {
+                    int tmp = tokens[p].str[i] - '0';
+                    if(tmp > 9 || tmp < 0)
+                        tmp = tokens[p].str[i] - 'a' + 10;
+                    value = value * 16 + tmp; 
+                }
+            }   
+            else { // Dec
+                int i, len = strlen(tokens[p].str);
+                for(i = 0; i < len; i ++) {
+                    value = value * 10 + tokens[p].str[i] - '0'; 
+                }
+            }
+        }
+        return value;
+    }
+    else if(check_parentheses(p, q) == 0) {
+    /* The expression is surrounded by a matched pair of parentheses. 
+     *       * If that is the case, just throw away the parentheses.
+     *               */
+        return eval(p + 1, q - 1); 
+    }
+    else {
+        int i, in_bracket = 0;
+        int op = 0, op_type = '*'; // initial op_type should be large enough
+        // op = the position of dominant operator in the token expression;
+        for(i = p; i <= q; i++) {
+            if(tokens[i].type == '(')
+                in_bracket++;
+            else if(tokens[i].type == ')')
+                in_bracket--;
+            else if((op_type == '+' || op_type == '*' || op_type == '-' || op_type == '/') && !in_bracket) {
+                if(op_less_equal(tokens[i].type, op_type)) {
+                    op = i;
+                    op_type = tokens[i].type;
+                }
+            }
+        }
+        int val1 = eval(p, op - 1);
+        int val2 = eval(op + 1, q);
+
+        switch(op_type) {
+            case '+': return val1 + val2;
+            case '-': return val1 - val2;
+            case '*':
+            {
+                return val1 * val2;
+            }
+            case '/': return val1 / val2;
+            default: Assert(0, "bad expression");
+        }
+    }
+
+}
+
 uint32_t expr(char *e, bool *success) {
 	if(!make_token(e)) {
 		*success = false;
 		return 0;
 	}
-
-	/* TODO: Insert codes to evaluate the expression. */
-	panic("please implement me");
-	return 0;
+    if(check_parentheses(0, nr_token - 1) == -1) {
+		*success = false;
+		return 0;
+    }
+    *success = true;
+    return eval(0, nr_token - 1);
 }
 

@@ -129,6 +129,7 @@ static bool make_token(char *e) {
     for(i = 0; i < nr_token; i ++) {
         if(tokens[i].type == '-' && (i == 0 || tokens[i - 1].type == '(' || is_operator(tokens[i - 1].type)) ) {
             tokens[i].type = NEG;
+            printf("%d  -- NEG\n", i);
         }
     }
 	return true; 
@@ -165,12 +166,16 @@ static bool op_less_equal(int p, int q) {
     int qt = tokens[q].type;
     if(qt == NOP)
         return true;
-    if(qt == NEG || qt == DEREF)
+    if(pt == NEG || pt == DEREF)
         return false;
-    if((pt == '*' || pt == '/') && (qt == '+' || qt == '-'))
-        return false;
-    else
+    else if (pt == '+' || pt == '-')
         return true;
+    else {
+        if(qt == NEG || qt == DEREF)
+            return false;
+        else
+            return true;
+    }
 }
 
 static int eval(int p, int q) {

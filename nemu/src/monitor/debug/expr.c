@@ -129,7 +129,6 @@ static bool make_token(char *e) {
     for(i = 0; i < nr_token; i ++) {
         if(tokens[i].type == '-' && (i == 0 || tokens[i - 1].type == '(' || is_operator(tokens[i - 1].type)) ) {
             tokens[i].type = NEG;
-            printf("%d  -- NEG\n", i);
         }
     }
 	return true; 
@@ -253,6 +252,7 @@ static int eval(int p, int q) {
                 in_bracket--;
             else if(is_operator(tokens[i].type) && !in_bracket) {
                 if(op_less_equal(tokens[i].type, op_type)) {
+                    printf("op=%d\n", op);
                     op = i;
                     op_type = tokens[i].type;
                 }

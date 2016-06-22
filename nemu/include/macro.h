@@ -12,4 +12,6 @@
 
 #define unalign_rw(addr, len)	(((unalign *)(addr))->concat(_, len))
 
+#define UNUSED(x) (void)x
+
 #endif

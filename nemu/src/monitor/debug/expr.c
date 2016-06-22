@@ -140,7 +140,7 @@ static int check_parentheses(int p, int q) {
     // -1 bad expression
     // 1  good expression, not match
     int st[64], top = 0;
-    (void)st;
+    UNUSED(st);
     int i;
     for(i = p; i <= q; i ++) {
         if(tokens[i].type == '(') {

@@ -252,7 +252,7 @@ static int eval(int p, int q) {
                 in_bracket--;
             else if(is_operator(tokens[i].type) && !in_bracket) {
                 if(op_less_equal(tokens[i].type, op_type)) {
-                    printf("op=%d\n", op);
+                    printf("yuan optype = %d, new optype=%d\n", op_type, tokens[i].type);
                     op = i;
                     op_type = tokens[i].type;
                 }

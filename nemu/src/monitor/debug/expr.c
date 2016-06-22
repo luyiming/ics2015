@@ -160,9 +160,7 @@ static int check_parentheses(int p, int q) {
         return 1;
 }
 
-static bool op_less_equal(int p, int q) {
-    int pt = tokens[p].type;
-    int qt = tokens[q].type;
+static bool op_less_equal(int pt, int qt) {
     if(qt == NOP)
         return true;
     if(pt == NEG || pt == DEREF)
@@ -252,7 +250,6 @@ static int eval(int p, int q) {
                 in_bracket--;
             else if(is_operator(tokens[i].type) && !in_bracket) {
                 if(op_less_equal(tokens[i].type, op_type)) {
-                    printf("yuan optype = %d, new optype=%d\n", op_type, tokens[i].type);
                     op = i;
                     op_type = tokens[i].type;
                 }

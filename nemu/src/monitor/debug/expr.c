@@ -199,7 +199,7 @@ static int eval(int p, int q) {
                 in_bracket++;
             else if(tokens[i].type == ')')
                 in_bracket--;
-            else if((op_type == '+' || op_type == '*' || op_type == '-' || op_type == '/') && !in_bracket) {
+            else if((tokens[i].type == '+' || tokens[i].type == '*' || tokens[i].type == '-' || tokens[i].type == '/') && !in_bracket) {
                 if(op_less_equal(tokens[i].type, op_type)) {
                     op = i;
                     op_type = tokens[i].type;

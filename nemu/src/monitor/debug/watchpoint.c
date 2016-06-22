@@ -64,7 +64,8 @@ bool hit_wp()
         int temp = expr(p->str, &success);
         if(temp != p->value)
         {
-            printf("Hit watchpoint #%d\texpr = %s, value = %d/%x\n", p->NO, p->str, p->value, p->value);
+            printf("Hit watchpoint #%d\texpr = %s, value = %d/0x%x --> %d/0x%x\n", p->NO, p->str, p->value, p->value, temp, temp);
+            p->value = temp;
             p->hit_times++;
             return true;
         }       

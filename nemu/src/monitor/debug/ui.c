@@ -132,6 +132,19 @@ static int cmd_info(char *args) {
 }
 
 static int cmd_x(char *args) {
+    char *arg = strtok(NULL, " ");
+    int i, n;
+    n = atoi(arg);
+    if(n == 0)
+        n = 1;
+    else
+        arg = strtok(NULL, " ");
+    bool success = false;
+    uint32_t t_addr = expr(arg, &success);
+    for(i = 0; i < n; i ++)
+    {
+        printf("%8x :\t%08x\n", t_addr + i, swaddr_read(t_addr + 4 * i, 4));
+    }
     return 0;
 }
 

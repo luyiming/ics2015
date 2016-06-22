@@ -261,7 +261,7 @@ static int eval(int p, int q) {
             case '-': return eval(p, op - 1) - eval(op + 1, q);
             case '*': return eval(p, op - 1) * eval(op + 1, q);
             case '/': return eval(p, op - 1) / eval(op + 1, q);
-            case NEG: printf("op=%d p=%d\n", op, p);/*Assert(op == p, "negtive operation\n");*/ return -eval(op + 1, q);
+            case NEG: return -eval(op + 1, q);
             case DEREF:
             {
                 int t_addr = eval(op + 1, q);

@@ -7,24 +7,37 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
+#include "cpu/reg.h"
+
 void cpu_exec(uint32_t);
 
 /* We use the ``readline'' library to provide more flexibility to read from stdin. */
 char* rl_gets() {
 	static char *line_read = NULL;
+    char *temp_line = NULL;
 
-	if (line_read) {
-		free(line_read);
-		line_read = NULL;
-	}
+	temp_line = readline("(nemu) ");
 
-	line_read = readline("(nemu) ");
-    if(!(*line_read))
-        printf("%d - %s", strlen(line_read), line_read);
+    int i, valid = 0, len = strlen(temp_line);
+    for(i = 0; i < len; i++) {
+        if(!isspace(temp_line[i])) {
+            valid = 1;
+            break;
+        }
+    }
 
-	if (line_read && *line_read) {
-		add_history(line_read);
-	}
+    if(valid) {
+        if(line_read) {
+            free(line_read);
+        }
+        line_read = temp_line;
+        add_history(line_read);
+    }
+    else {
+        if(temp_line) {
+            free(temp_line);
+        }
+    }
 
 	return line_read;
 }
@@ -40,16 +53,20 @@ static int cmd_q(char *args) {
 
 static int cmd_help(char *args);
 static int cmd_si(char *args);
+static int cmd_info(char *args);
+static int cmd_x(char *args);
 
 static struct {
 	char *name;
 	char *description;
 	int (*handler) (char *);
 } cmd_table [] = {
-	{ "help", "Display informations about all supported commands", cmd_help },
-	{ "c", "Continue the execution of the program", cmd_c },
-	{ "q", "Exit NEMU", cmd_q },
-    { "si", "Step one instruction exactly.\nUsage: si [N]", cmd_si },
+	{ "help", "Display informations about all supported commands\n", cmd_help },
+	{ "c", "Continue the execution of the program\n", cmd_c },
+	{ "q", "Exit NEMU\n", cmd_q },
+    { "si", "Step one instruction exactly.\n", cmd_si },
+    { "info", "Show information\n", cmd_info },
+    { "x", "Examine memory\n", cmd_x },
 
 	/* TODO: Add more commands */
 
@@ -87,6 +104,32 @@ static int cmd_si(char *args) {
         n = atoi(arg);
     }
     cpu_exec(n);
+    return 0;
+}
+
+static int cmd_info(char *args) {
+    char *arg = strtok(NULL, " ");
+
+    if(arg == NULL) {
+
+    }
+    else if(strcmp(arg, "r") == 0) {
+        int i;
+        for(i = R_EAX; i <= R_EDI; i ++) {
+            printf("%s\t\t0x%08x\n", regsl[i], reg_l(i));
+        }
+        printf("eip\t\t0x%08x\n", cpu.eip);
+    }
+    else if(strcmp(arg, "w") == 0) {
+
+    }
+    else {
+        printf("Invalid use\n");
+    }
+    return 0;
+}
+
+static int cmd_x(char *args) {
     return 0;
 }
 

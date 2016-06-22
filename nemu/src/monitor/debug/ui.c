@@ -140,10 +140,7 @@ static int cmd_p(char *args) {
         bool success = false;
         int value = expr(args, &success);
         if(success) {
-            if(strchr(args, '%') != NULL)
-                printf("0x%x\n", value);
-            else
-                printf("%d", value);
+            printf("%d\t0x%x\n", value, value);
         }
         else
             printf("bad expression\n");

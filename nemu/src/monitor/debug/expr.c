@@ -7,11 +7,16 @@
 #include <regex.h>
 
 enum {
-	NOTYPE = 256, EQ, NUM, REG, VAR
-
-	/* TODO: Add more token types */
-
+	NOTYPE = 256, EQ, NUM, REG, VAR, NEG, DEREF, NOP
 };
+
+static bool is_operator(int type) {
+    if(type == '+' || type == '-' || type == '*' || type == '/' ||
+       type == NEG || type == DEREF)
+        return true;
+    else
+        return false;
+}
 
 static struct rule {
 	char *regex;
@@ -116,7 +121,16 @@ static bool make_token(char *e) {
 			return false;
 		}
 	}
-
+    for(i = 0; i < nr_token; i ++) {
+        if(tokens[i].type == '*' && (i == 0 || tokens[i - 1].type == '(' || is_operator(tokens[i - 1].type)) ) {
+            tokens[i].type = DEREF;
+        }
+    }
+    for(i = 0; i < nr_token; i ++) {
+        if(tokens[i].type == '-' && (i == 0 || tokens[i - 1].type == '(' || is_operator(tokens[i - 1].type)) ) {
+            tokens[i].type = NEG;
+        }
+    }
 	return true; 
 }
 
@@ -146,8 +160,14 @@ static int check_parentheses(int p, int q) {
         return 1;
 }
 
-static bool op_less_equal(int lhs, int rhs) {
-    if((lhs == '*' || lhs == '/') && (rhs == '+' || rhs == '-'))
+static bool op_less_equal(int p, int q) {
+    int pt = tokens[p].type;
+    int qt = tokens[q].type;
+    if(qt == NOP)
+        return true;
+    if((pt == NEG || pt == DEREF) && (qt == '+' || qt == '-' || qt == '*' || qt == '/'))
+        return false;
+    else if((pt == '*' || pt == '/') && (qt == '+' || qt == '-'))
         return false;
     else
         return true;
@@ -219,32 +239,35 @@ static int eval(int p, int q) {
     }
     else {
         int i, in_bracket = 0;
-        int op = 0, op_type = '*'; // initial op_type should be large enough
+        int op = 0, op_type = NOP; // initial op_type should be large enough
         // op = the position of dominant operator in the token expression;
         for(i = p; i <= q; i++) {
             if(tokens[i].type == '(')
                 in_bracket++;
             else if(tokens[i].type == ')')
                 in_bracket--;
-            else if((tokens[i].type == '+' || tokens[i].type == '*' || tokens[i].type == '-' || tokens[i].type == '/') && !in_bracket) {
+            else if(is_operator(tokens[i].type) && !in_bracket) {
                 if(op_less_equal(tokens[i].type, op_type)) {
                     op = i;
                     op_type = tokens[i].type;
                 }
             }
         }
-        int val1 = eval(p, op - 1);
-        int val2 = eval(op + 1, q);
 
         switch(op_type) {
-            case '+': return val1 + val2;
-            case '-': return val1 - val2;
-            case '*':
+            case '+': return eval(p, op - 1) + eval(op + 1, q);
+            case '-': return eval(p, op - 1) - eval(op + 1, q);
+            case '*': return eval(p, op - 1) * eval(op + 1, q);
+            case '/': return eval(p, op - 1) / eval(op + 1, q);
+            case NEG: Assert(op == p, "negtive operation\n"); return -eval(op + 1, q);
+            case DEREF:
             {
-                return val1 * val2;
+                int t_addr = eval(op + 1, q);
+                Assert(t_addr >= 0, "address out of range: 0x%x\t %d\n", t_addr, t_addr);
+                uint32_t value = swaddr_read(t_addr, 4);
+                return value;
             }
-            case '/': return val1 / val2;
-            default: Assert(0, "bad expression");
+            default: Assert(0, "bad expression\n");
         }
     }
 }

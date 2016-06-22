@@ -143,7 +143,11 @@ static int cmd_x(char *args) {
     uint32_t t_addr = expr(arg, &success);
     for(i = 0; i < n; i ++)
     {
-        printf("%8x :\t%08x\n", t_addr + i, swaddr_read(t_addr + 4 * i, 4));
+        printf("%8x :\t0x%08x\n", t_addr + i, swaddr_read(t_addr + 4 * i, 4));
+        int j;
+        for(j = 0; j < 4; j ++) {
+            printf("%02x ", swaddr_read(t_addr + 4 * i + j, 1));
+        }
     }
     return 0;
 }

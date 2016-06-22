@@ -164,8 +164,8 @@ static int eval(int p, int q) {
      *       * For now this token should be a number. 
      *               * Return the value of the number.
      *                       */ 
-        int value = 0;
         if(tokens[p].type == NUM) {
+            int value = 0;
             if(strncmp(tokens[p].str, "0x", 2) == 0) { // Hex
                 int i, len = strlen(tokens[p].str);
                 for(i = 2; i < len; i ++) {
@@ -181,8 +181,34 @@ static int eval(int p, int q) {
                     value = value * 10 + tokens[p].str[i] - '0'; 
                 }
             }
+            return value;
         }
-        return value;
+        else if(tokens[p].type == REG) {
+            uint32_t value = 0;
+            int i;
+            for(i = R_EAX; i <= R_EDI; i ++) {
+                if(strcmp(tokens[p].str, regsl[i]) == 0) {
+                    value = reg_l(i);
+                    return value;
+                }
+            }
+            for(i = R_AX; i <= R_DI; i ++) {
+                if(strcmp(tokens[p].str, regsw[i]) == 0) {
+                    value = reg_w(i);
+                    return value;
+                }
+            }
+            for(i = R_AL; i <= R_BH; i ++) {
+                if(strcmp(tokens[p].str, regsb[i]) == 0) {
+                    value = reg_b(i);
+                    return value;
+                }
+            }
+            printf("undefined register\n");
+            return -1;
+        }
+        else
+            return 0;
     }
     else if(check_parentheses(p, q) == 0) {
     /* The expression is surrounded by a matched pair of parentheses. 
@@ -220,10 +246,9 @@ static int eval(int p, int q) {
             default: Assert(0, "bad expression");
         }
     }
-
 }
 
-uint32_t expr(char *e, bool *success) {
+int expr(char *e, bool *success) {
 	if(!make_token(e)) {
 		*success = false;
 		return 0;

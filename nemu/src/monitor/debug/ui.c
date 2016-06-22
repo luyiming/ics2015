@@ -56,6 +56,8 @@ static int cmd_si(char *args);
 static int cmd_info(char *args);
 static int cmd_x(char *args);
 static int cmd_p(char *args);
+static int cmd_w(char *args);
+static int cmd_d(char *args);
 
 static struct {
 	char *name;
@@ -69,6 +71,8 @@ static struct {
     { "info", "Show information\n", cmd_info },
     { "x", "Examine memory\n", cmd_x },
     { "p", "Print expression\n", cmd_p },
+    { "w", "Set watchpoint\n", cmd_w },
+    { "d", "Delete watchpoint\n", cmd_d },
 
 	/* TODO: Add more commands */
 
@@ -123,7 +127,7 @@ static int cmd_info(char *args) {
         printf("eip\t\t0x%08x\n", cpu.eip);
     }
     else if(strcmp(arg, "w") == 0) {
-
+        print_wp();
     }
     else {
         printf("Invalid use\n");
@@ -166,6 +170,38 @@ static int cmd_p(char *args) {
     return 0;
 }
 
+static int cmd_w(char *args) {
+    WP *wp = new_wp();
+    if(wp == NULL) {
+        printf("no more watchpoint\n");
+    }
+    else {
+        bool success = false;
+        wp->value = expr(args, &success);
+        if(!success) {
+            printf("bad expression\n");
+            free_wp(wp->NO);
+        }
+        strcpy(wp->str, args);
+        printf("watchpoint #%d\t%d\t0x%x\t\t%s\n", wp->NO, wp->value, wp->value, wp->str);
+    }
+    return 0;
+}
+
+static int cmd_d(char *args) {
+    char *arg = strtok(NULL, " ");
+    int n = atoi(arg);
+    if(n == 0) {
+        printf("syntax error. Usage d [N]\n");
+    }
+    else {
+        if(free_wp(n))
+            printf("delete watchpoint #%d\n", n);
+        else
+            printf("no watchpoint #%d\n", n);
+    }
+    return 0;
+} 
 void ui_mainloop() {
 	while(1) {
 		char *str = rl_gets();

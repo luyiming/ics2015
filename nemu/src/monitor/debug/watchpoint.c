@@ -8,15 +8,11 @@ static WP wp_pool[NR_WP];
 static WP *head, *free_;
 
 static void check_wp() {
-    int sum = 0;
+    int i = 1;
     WP *p;
     for(p = head; p != NULL; p = p->next) {
-        sum += p->NO;
+        p->NO = i++;
     }
-    for(p = free_; p != NULL; p = p->next) {
-        sum += p->NO;
-    }
-    Assert(sum == (1 + NR_WP) * NR_WP / 2, "Watchpoint pool implementation error\n");
 }
 
 void init_wp_pool() {
@@ -38,9 +34,16 @@ WP* new_wp() {
         return NULL;
     WP *p = free_;
     free_ = free_->next;
+    p->next = NULL;
 
-    p->next = head;
-    head = p;
+    if(head == NULL)
+        head = p;
+    else {
+        WP *p2 = head;
+        while(p2->next != NULL) 
+            p2 = p2->next;
+        p2->next = p;
+    }
     check_wp();
     return p;
 }

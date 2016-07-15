@@ -33,7 +33,7 @@ static struct rule {
     { "\\$[a-zA-Z]+",   REG },      // register
     { "[^$][a-zA-Z]+",  VAR },      // variable
 	{ "&&",             LAN },      // logical and
-	{ "||",             LOR },      // logical or
+	{ "\\|\\|",             LOR },      // logical or
 	{ ">=",             GE },       // greater equal
 	{ "<=",             LE },       // less eqaul
     { ">",              '>'},

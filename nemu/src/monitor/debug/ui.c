@@ -122,11 +122,12 @@ static int cmd_info(char *args) {
             printf("%s    0x%08x\n", regsl[i], reg_l(i));
         }
         char flag_str[128] = {'\0'};
-        cpu.eflags = 0xffffffff;
         if(cpu.CF) strcat(flag_str, "CF ");
         if(cpu.PF) strcat(flag_str, "PF ");
         if(cpu.ZF) strcat(flag_str, "ZF ");
         if(cpu.SF) strcat(flag_str, "SF ");
+        if(cpu.IF) strcat(flag_str, "IF ");
+        if(cpu.DF) strcat(flag_str, "DF ");
         if(cpu.OF) strcat(flag_str, "OF ");
         printf("eflags %x\n", cpu.eflags);
         printf("eflags [ %s]\n", flag_str);

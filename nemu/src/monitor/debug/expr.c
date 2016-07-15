@@ -31,7 +31,7 @@ static struct rule {
 	{ "!=",             NE },       // not equal
     { "(0x)?[0-9]+",    NUM },      // number
     { "\\$[a-zA-Z]+",   REG },      // register
-    { "[^$][a-zA-Z]+",  VAR },      // variable
+    { "[a-zA-Z]+",  VAR },          // variable
 	{ "&&",             LAN },      // logical and
 	{ "\\|\\|",         LOR },      // logical or
 	{ "<<",             SHL },      // shift left

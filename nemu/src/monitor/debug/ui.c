@@ -81,7 +81,6 @@ static struct {
 #define NR_CMD (sizeof(cmd_table) / sizeof(cmd_table[0]))
 
 static int cmd_help(char *args) {
-    printf("sizeof EFLAGS: %u\n", sizeof(cpu.EFLAGS));
 	/* extract the first argument */
 	char *arg = strtok(NULL, " ");
 	int i;
@@ -120,9 +119,16 @@ static int cmd_info(char *args) {
     if(strcmp(arg, "r") == 0) {
         int i;
         for(i = R_EAX; i <= R_EDI; i++) {
-            printf("%s   0x%08x\n", regsl[i], reg_l(i));
+            printf("%s    0x%08x\n", regsl[i], reg_l(i));
         }
-        printf("eip   0x%08x\n", cpu.eip);
+        char flag_str[128] = {'\0'};
+        if(cpu.CF) strcat(flag_str, "CF ");
+        if(cpu.PF) strcat(flag_str, "PF ");
+        if(cpu.ZF) strcat(flag_str, "ZF ");
+        if(cpu.SF) strcat(flag_str, "SF ");
+        if(cpu.OF) strcat(flag_str, "OF ");
+        printf("eflags [ %s]\n", flag_str);
+        printf("eip    0x%08x\n", cpu.eip);
     }
     else if(strcmp(arg, "w") == 0) {
         print_wp();

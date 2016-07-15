@@ -97,6 +97,7 @@ static bool make_token(char *e) {
                         tokens[nr_token].type = NUM; 
                         strncpy(tokens[nr_token].str, substr_start, substr_len);
                         tokens[nr_token].str[substr_len + 1] = '\0';
+                        printf("num: %s\n", tokens[nr_token].str);
                         nr_token++;
                         break;
                     }

@@ -7,15 +7,14 @@
 #include <regex.h>
 
 enum {
-	NOTYPE = 256, EQ, NUM, REG, VAR, NEG, DEREF, NOP
+	NOTYPE = 256, NUM, REG, VAR, LOR, LAN, EQ, NE, LE, GE, NEG, DEREF
 };
 
 static bool is_operator(int type) {
-    if(type == '+' || type == '-' || type == '*' || type == '/' ||
-       type == NEG || type == DEREF)
-        return true;
-    else
+    if(type == '(' || type == ')' || type == NUM || type == REG || type == VAR)
         return false;
+    else
+        return true;
 }
 
 static struct rule {
@@ -30,14 +29,14 @@ static struct rule {
 	{ " +",	            NOTYPE },   // spaces
 	{ "==",             EQ },       // equal
     { "(0x)?[0-9]+",    NUM },      // number
-    { "%[a-zA-Z]+",     REG },      // register
-    { "[^%][a-zA-Z]+",  VAR },      // variable
+    { "\\$[a-zA-Z]+",   REG },      // register
+    { "[^$][a-zA-Z]+",  VAR },      // variable
     { "\\(",            '('},
     { "\\)",            ')'},
-	{ "\\+",            '+'},				
-	{ "-",              '-'},				
-	{ "\\*",            '*'},				
-	{ "/",              '/'},					
+	{ "\\+",            '+'},
+	{ "-",              '-'},
+	{ "\\*",            '*'},
+	{ "/",              '/'},
 };
 
 #define NR_REGEX (sizeof(rules) / sizeof(rules[0]) )
@@ -101,7 +100,7 @@ static bool make_token(char *e) {
                         nr_token++;
                         break;
                     }
-                    case REG:   //remove prefix %
+                    case REG:   //remove prefix $
                     {
                         tokens[nr_token].type = REG; 
                         strncpy(tokens[nr_token].str, substr_start + 1, substr_len - 1);
@@ -134,6 +133,182 @@ static bool make_token(char *e) {
 	return true; 
 }
 
+static int priority(int tk) {
+    switch(tk) {
+        case NEG: case DEREF: case '!': case '~':
+            return 10;
+        case '*': case '/': case '%':
+            return 9;
+        case '+': case '-':
+            return 8;
+        case '>': case '<': case LE: case GE:
+            return 7;
+        case EQ: case NE: return 6;
+        case '&': return 5;
+        case '^': return 4;
+        case '|': return 3;
+        case LAN: return 2;
+        case LOR: return 1;
+        case NOTYPE: return -1;
+        default:  return -1;
+    }
+}
+
+static int v_st[64], op_st[64]; // value_stack, operator_stack
+static int v_top = -1, op_top = -1;   // v_st_top, op_st_top
+static bool success = true;
+
+static int calc_once(int op) {
+    switch(op) {
+        case NEG: 
+            if(v_top < 0) {
+                return 0;
+            } 
+            v_st[v_top] = - v_st[v_top]; 
+            break;
+        case DEREF: 
+            if(v_top < 0) {
+                return 0;
+            }
+            if(v_st[v_top] < 0) {
+                printf("address out of range: 0x%x\t %d\n", v_st[v_top], v_st[v_top]);
+                return 0;
+            }
+            v_st[v_top] = swaddr_read(v_st[v_top], 4); 
+            break;
+        case '*': 
+            if(v_top < 1) {
+                return 0;
+            }
+            v_st[v_top-1] = v_st[v_top-1] * v_st[v_top]; 
+            v_top--;
+            break;
+        case '/': 
+            if(v_top < 1) {
+                return 0;
+            }
+            v_st[v_top-1] = v_st[v_top-1] / v_st[v_top]; 
+            v_top--;
+            break;
+        case '+': 
+            if(v_top < 1) {
+                return 0;
+            }
+            v_st[v_top-1] = v_st[v_top-1] + v_st[v_top]; 
+            v_top--;
+            break;
+        case '-': 
+            if(v_top < 1) {
+                return 0;
+            }
+            v_st[v_top-1] = v_st[v_top-1] - v_st[v_top]; 
+            v_top--;
+            break;
+        default: return 0;
+    }
+    return 1;
+}
+
+static int calc() {
+    op_st[++op_top] = NOTYPE;
+    int i;
+    for(i = 0; i < nr_token; ++ i) {
+        if(tokens[i].type == NUM) {
+            char *s = tokens[i].str;
+            int value = *s++ - '0';
+            if(value != 0) {  // Dec
+                while(*s >= '0' && *s <= '9')
+                    value = value * 10 + *s++ - '0';
+            }
+            else {
+                if(*s == 'x' || *s == 'X') { // Hex
+                    s++;
+                    while((*s >= '0' && *s <= '9') || (*s >= 'a' && *s <= 'f') || (*s >= 'A' && *s <= 'F')) {
+                        value = value * 16 + (*s & 0xf) + (*s > '9' ? 9 : 0);
+                        s++;
+                    }
+                }
+                else {  // Oct
+                    while(*s >= '0' && *s <= '7') {
+                        value = value * 8 + *s++ - '0';
+                    }
+                }
+            }
+            v_st[++v_top] = value;
+        }
+        else if(tokens[i].type == REG) {
+            int value = 0;
+            int j;
+            for(j = R_EAX; j <= R_EDI; j ++) {
+                if(strcmp(tokens[i].str, regsl[j]) == 0) {
+                    value = reg_l(j);
+                }
+            }
+            for(j = R_AX; j <= R_DI; j ++) {
+                if(strcmp(tokens[i].str, regsw[j]) == 0) {
+                    value = reg_w(j);
+                }
+            }
+            for(j = R_AL; j <= R_BH; j ++) {
+                if(strcmp(tokens[i].str, regsb[j]) == 0) {
+                    value = reg_b(j);
+                }
+            }
+            if(strcmp(tokens[i].str, "eip") == 0)
+                value = cpu.eip;
+            v_st[++v_top] = value;
+        }
+        else if(tokens[i].type == '(') {
+            op_st[++op_top] = '(';
+        }
+        else if(tokens[i].type == ')') {
+            while(op_top > 0 && op_st[op_top] != '(') {
+                if(calc_once(op_st[op_top--]) == 0) {
+                    success = false;
+                    return 0;
+                }
+            }
+            if(op_top == 0) { // miss left (
+                printf("miss left parenthesis\n");
+                return 0;
+            }
+            if(op_top >= 0 && op_st[op_top] == '(') {
+                op_top--;
+            }
+        }
+        else {
+            if(priority(tokens[i].type) > priority(op_st[op_top])) {
+                op_st[++op_top] = tokens[i].type;
+            }
+            else {
+                if(priority(op_st[op_top]) == priority(NEG) && priority(tokens[i].type) == priority(NEG))
+                    op_st[++op_top] = tokens[i].type;
+                else {
+                    while(op_top > 0 && op_st[op_top] >= tokens[i].type) {
+                        if(calc_once(op_st[op_top--]) == 0) {
+                            success = false;
+                            return 0;
+                        }
+                    }
+                    op_st[++op_top] = tokens[i].type;
+                }
+            }
+        }
+    }
+    while(op_top > 0) {
+        if(calc_once(op_st[op_top--]) == 0) {
+            success = false;
+            return 0;
+        }
+    }
+    if(v_top != 0) {
+        printf("bad expression\n");
+        return 0;
+    }
+    return v_st[0];
+}
+
+/*
 static int check_parentheses(int p, int q) {
     // return value:
     // 0  match
@@ -160,6 +335,7 @@ static int check_parentheses(int p, int q) {
         return 1;
 }
 
+
 static bool op_less_equal(int pt, int qt) {
     if(qt == NOP)
         return true;
@@ -175,16 +351,16 @@ static bool op_less_equal(int pt, int qt) {
     }
 }
 
+
 static int eval(int p, int q) {
     if(p > q) {
-                /* Bad expression */
+//                Bad expression 
         return 0;
     }
     else if(p == q) { 
-    /* Single token.
-     *       * For now this token should be a number. 
-     *               * Return the value of the number.
-     *                       */ 
+    // Single token.
+    //       * For now this token should be a number. 
+    //               * Return the value of the number.
         if(tokens[p].type == NUM) {
             int value = 0;
             if(strncmp(tokens[p].str, "0x", 2) == 0) { // Hex
@@ -234,9 +410,8 @@ static int eval(int p, int q) {
             return 0;
     }
     else if(check_parentheses(p, q) == 0) {
-    /* The expression is surrounded by a matched pair of parentheses. 
-     *       * If that is the case, just throw away the parentheses.
-     *               */
+    // The expression is surrounded by a matched pair of parentheses. 
+    //       * If that is the case, just throw away the parentheses.
         return eval(p + 1, q - 1); 
     }
     else {
@@ -273,17 +448,22 @@ static int eval(int p, int q) {
         }
     }
 }
+*/
 
-int expr(char *e, bool *success) {
+int expr(char *e, bool *suc) {
+
 	if(!make_token(e)) {
-		*success = false;
+		*suc = false;
 		return 0;
 	}
+/*
     if(check_parentheses(0, nr_token - 1) == -1) {
 		*success = false;
 		return 0;
     }
-    *success = true;
-    return eval(0, nr_token - 1);
+*/
+    int value = calc();
+    *suc = success;
+    return value;
 }
 

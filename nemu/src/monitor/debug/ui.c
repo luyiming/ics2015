@@ -64,15 +64,15 @@ static struct {
 	char *description;
 	int (*handler) (char *);
 } cmd_table [] = {
-	{ "help", "Display informations about all supported commands\n", cmd_help },
-	{ "c", "Continue the execution of the program\n", cmd_c },
-	{ "q", "Exit NEMU\n", cmd_q },
-    { "si", "Step one instruction exactly.\n", cmd_si },
-    { "info", "Show information\n", cmd_info },
-    { "x", "Examine memory\n", cmd_x },
-    { "p", "Print expression\n", cmd_p },
-    { "w", "Set watchpoint\n", cmd_w },
-    { "d", "Delete watchpoint\n", cmd_d },
+	{ "help", "Display informations about all supported commands", cmd_help },
+	{ "c", "Continue the execution of the program", cmd_c },
+	{ "q", "Exit NEMU", cmd_q },
+    { "si", "Step one instruction exactly", cmd_si },
+    { "info", "Show information", cmd_info },
+    { "x", "Examine memory", cmd_x },
+    { "p", "Print expression", cmd_p },
+    { "w", "Set watchpoint", cmd_w },
+    { "d", "Delete watchpoint", cmd_d },
 
 	/* TODO: Add more commands */
 
@@ -116,21 +116,18 @@ static int cmd_si(char *args) {
 static int cmd_info(char *args) {
     char *arg = strtok(NULL, " ");
 
-    if(arg == NULL) {
-
-    }
-    else if(strcmp(arg, "r") == 0) {
+    if(strcmp(arg, "r") == 0) {
         int i;
-        for(i = R_EAX; i <= R_EDI; i ++) {
-            printf("%s\t\t0x%08x\n", regsl[i], reg_l(i));
+        for(i = R_EAX; i <= R_EDI; i++) {
+            printf("%s   0x%08x\n", regsl[i], reg_l(i));
         }
-        printf("eip\t\t0x%08x\n", cpu.eip);
+        printf("eip   0x%08x\n", cpu.eip);
     }
     else if(strcmp(arg, "w") == 0) {
         print_wp();
     }
     else {
-        printf("Invalid use\n");
+        printf("Usage: info r/w\n");
     }
     return 0;
 }
@@ -162,7 +159,7 @@ static int cmd_p(char *args) {
         bool success = false;
         int value = expr(args, &success);
         if(success) {
-            printf("%d\t0x%x\n", value, value);
+            printf("%d   0x%x\n", value, value);
         }
         else
             printf("bad expression\n");
@@ -201,7 +198,7 @@ static int cmd_d(char *args) {
             printf("no watchpoint #%d\n", n);
     }
     return 0;
-} 
+}
 void ui_mainloop() {
 	while(1) {
 		char *str = rl_gets();

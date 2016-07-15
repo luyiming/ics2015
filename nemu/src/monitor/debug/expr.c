@@ -7,7 +7,7 @@
 #include <regex.h>
 
 enum {
-	NOTYPE = 256, NUM, REG, VAR, LOR, LAN, EQ, NE, LE, GE, NEG, DEREF
+	NOTYPE = 256, NUM, REG, VAR, LOR, LAN, EQ, NE, LE, GE, NEG, DEREF, NOP
 };
 
 static bool is_operator(int type) {
@@ -139,12 +139,17 @@ static bool make_token(char *e) {
             tokens[i].type = NEG;
         }
     }
+    for(i = 0; i < nr_token; i ++) {
+        if(tokens[i].type == '+' && (i == 0 || tokens[i - 1].type == '(' || is_operator(tokens[i - 1].type)) ) {
+            tokens[i].type = NOP;
+        }
+    }
 	return true; 
 }
 
 static int priority(int tk) {
     switch(tk) {
-        case NEG: case DEREF: case '!': case '~':
+        case NOP: case NEG: case DEREF: case '!': case '~':
             return 10;
         case '*': case '/': case '%':
             return 9;
@@ -169,6 +174,8 @@ static bool success = true;
 
 static int calc_once(int op) {
     switch(op) {
+        case NOP:
+            break;
         case NEG: 
             if(v_top < 0) {
                 printf("Negation: missing operand\n");

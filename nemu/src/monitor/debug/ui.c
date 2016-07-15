@@ -81,6 +81,7 @@ static struct {
 #define NR_CMD (sizeof(cmd_table) / sizeof(cmd_table[0]))
 
 static int cmd_help(char *args) {
+    printf("sizeof EFLAGS: %u\n", sizeof(cpu.EFLAGS));
 	/* extract the first argument */
 	char *arg = strtok(NULL, " ");
 	int i;

@@ -127,6 +127,7 @@ static int cmd_info(char *args) {
         if(cpu.ZF) strcat(flag_str, "ZF ");
         if(cpu.SF) strcat(flag_str, "SF ");
         if(cpu.OF) strcat(flag_str, "OF ");
+        printf("eflags %x\n", cpu.eflags);
         printf("eflags [ %s]\n", flag_str);
         printf("eip    0x%08x\n", cpu.eip);
     }

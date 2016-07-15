@@ -69,6 +69,10 @@ bool free_wp(int number) {
 
 void print_wp() {
     WP *p;
+    if(head == NULL) {
+        printf("no watchpoints\n");
+        return;
+    }
     printf("Num\t\tExpression\n");
     for(p = head; p != NULL; p = p->next) {
         printf("%d\t\t%s\n", p->NO, p->str);
@@ -77,6 +81,7 @@ void print_wp() {
 
 bool hit_wp()
 {
+    bool is_hit = false;
     WP *p;
     for(p = head; p != NULL; p = p->next) {
         bool success = false;
@@ -86,8 +91,8 @@ bool hit_wp()
             printf("Hit watchpoint #%d\texpr = %s, value = %d/0x%x --> %d/0x%x\n", p->NO, p->str, p->value, p->value, temp, temp);
             p->value = temp;
             p->hit_times++;
-            return true;
+            is_hit = true;
         }       
     }
-    return false;
+    return is_hit;
 }

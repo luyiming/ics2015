@@ -179,8 +179,10 @@ static int cmd_w(char *args) {
             printf("bad expression\n");
             free_wp(wp->NO);
         }
-        strcpy(wp->str, args);
-        printf("watchpoint #%d\t%d\t0x%x\t\t%s\n", wp->NO, wp->value, wp->value, wp->str);
+        else {
+            strcpy(wp->str, args);
+            printf("watchpoint #%d\tvalue:%d/0x%x\t\texpr:%s\n", wp->NO, wp->value, wp->value, wp->str);
+        }
     }
     return 0;
 }
@@ -195,7 +197,7 @@ static int cmd_d(char *args) {
         if(free_wp(n))
             printf("delete watchpoint #%d\n", n);
         else
-            printf("no watchpoint #%d\n", n);
+            printf("cannot find watchpoint #%d\n", n);
     }
     return 0;
 }

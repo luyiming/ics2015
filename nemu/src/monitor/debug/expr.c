@@ -7,7 +7,7 @@
 #include <regex.h>
 
 enum {
-	NOTYPE = 256, NUM, REG, VAR, LOR, LAN, EQ, NE, LE, GE, NEG, DEREF, NOP
+	NOTYPE = 256, NUM, REG, VAR, LOR, LAN, EQ, NE, LE, GE, SHL, SHR, NEG, DEREF, NOP
 };
 
 static bool is_operator(int type) {
@@ -33,12 +33,16 @@ static struct rule {
     { "\\$[a-zA-Z]+",   REG },      // register
     { "[^$][a-zA-Z]+",  VAR },      // variable
 	{ "&&",             LAN },      // logical and
-	{ "\\|\\|",             LOR },      // logical or
+	{ "\\|\\|",         LOR },      // logical or
+	{ "<<",             SHL },      // shift left
+	{ ">>",             SHR },      // shift right
 	{ ">=",             GE },       // greater equal
 	{ "<=",             LE },       // less eqaul
     { ">",              '>'},
     { "<",              '<'},
     { "&",              '&'},
+    { "~",              '~'},
+    { "!",              '!'},
     { "\\^",            '^'},
     { "\\|",            '|'},
     { "\\(",            '('},
@@ -47,6 +51,7 @@ static struct rule {
 	{ "-",              '-'},
 	{ "\\*",            '*'},
 	{ "/",              '/'},
+	{ "%",              '%'},
 };
 
 #define NR_REGEX (sizeof(rules) / sizeof(rules[0]) )
@@ -153,10 +158,12 @@ static bool make_token(char *e) {
 static int priority(int tk) {
     switch(tk) {
         case NOP: case NEG: case DEREF: case '!': case '~':
-            return 10;
+            return 11;
         case '*': case '/': case '%':
-            return 9;
+            return 10;
         case '+': case '-':
+            return 9;
+        case SHL: case SHR:
             return 8;
         case '>': case '<': case LE: case GE:
             return 7;
@@ -197,6 +204,20 @@ static int calc_once(int op) {
             }
             v_st[v_top] = swaddr_read(v_st[v_top], 4); 
             break;
+        case '!': 
+            if(v_top < 0) {
+                printf("! operation: missing operand\n");
+                return 0;
+            } 
+            v_st[v_top] = ! v_st[v_top]; 
+            break;
+        case '~': 
+            if(v_top < 0) {
+                printf("~ operation: missing operand\n");
+                return 0;
+            } 
+            v_st[v_top] = ~ v_st[v_top]; 
+            break;
         case '*': 
             if(v_top < 1) {
                 printf("Multiplication: missing operand\n");
@@ -213,6 +234,14 @@ static int calc_once(int op) {
             v_st[v_top-1] = v_st[v_top-1] / v_st[v_top]; 
             v_top--;
             break;
+        case '%': 
+            if(v_top < 1) {
+                printf("Modulo operation: missing operand\n");
+                return 0;
+            }
+            v_st[v_top-1] = v_st[v_top-1] % v_st[v_top]; 
+            v_top--;
+            break;
         case '+': 
             if(v_top < 1) {
                 printf("Addition: missing operand\n");
@@ -227,6 +256,22 @@ static int calc_once(int op) {
                 return 0;
             }
             v_st[v_top-1] = v_st[v_top-1] - v_st[v_top]; 
+            v_top--;
+            break;
+        case SHL: 
+            if(v_top < 1) {
+                printf("<< operation: missing operand\n");
+                return 0;
+            }
+            v_st[v_top-1] = v_st[v_top-1] << v_st[v_top]; 
+            v_top--;
+            break;
+        case SHR: 
+            if(v_top < 1) {
+                printf(">> operation: missing operand\n");
+                return 0;
+            }
+            v_st[v_top-1] = v_st[v_top-1] >> v_st[v_top]; 
             v_top--;
             break;
         case '>':

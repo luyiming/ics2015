@@ -122,6 +122,7 @@ static int cmd_info(char *args) {
             printf("%s    0x%08x\n", regsl[i], reg_l(i));
         }
         char flag_str[128] = {'\0'};
+        cpu.eflags = 0xffffffff;
         if(cpu.CF) strcat(flag_str, "CF ");
         if(cpu.PF) strcat(flag_str, "PF ");
         if(cpu.ZF) strcat(flag_str, "ZF ");

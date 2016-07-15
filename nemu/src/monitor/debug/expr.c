@@ -28,9 +28,16 @@ static struct rule {
 
 	{ " +",	            NOTYPE },   // spaces
 	{ "==",             EQ },       // equal
+	{ "!=",             NE },       // not equal
     { "(0x)?[0-9]+",    NUM },      // number
     { "\\$[a-zA-Z]+",   REG },      // register
     { "[^$][a-zA-Z]+",  VAR },      // variable
+	{ "&&",             LAN },      // logical and
+	{ "||",             LOR },      // logical or
+	{ ">=",             GE },       // greater equal
+	{ "<=",             LE },       // less eqaul
+    { ">",              '>'},
+    { "<",              '<'},
     { "\\(",            '('},
     { "\\)",            ')'},
 	{ "\\+",            '+'},
@@ -97,7 +104,7 @@ static bool make_token(char *e) {
                         tokens[nr_token].type = NUM; 
                         strncpy(tokens[nr_token].str, substr_start, substr_len);
                         tokens[nr_token].str[substr_len] = '\0';
-                        printf("num: %s\n", tokens[nr_token].str);
+                        // printf("num: %s\n", tokens[nr_token].str);
                         nr_token++;
                         break;
                     }
@@ -106,7 +113,7 @@ static bool make_token(char *e) {
                         tokens[nr_token].type = REG; 
                         strncpy(tokens[nr_token].str, substr_start + 1, substr_len - 1);
                         tokens[nr_token].str[substr_len - 1] = '\0';
-                        printf("reg name: %s\n", tokens[nr_token].str);
+                        // printf("reg name: %s\n", tokens[nr_token].str);
                         nr_token++;
                         break;
                     }
@@ -212,6 +219,70 @@ static int calc_once(int op) {
             v_st[v_top-1] = v_st[v_top-1] - v_st[v_top]; 
             v_top--;
             break;
+        case '>':
+            if(v_top < 1) {
+                printf("> operation: missing operand\n");
+                return 0;
+            }
+            v_st[v_top-1] = (v_st[v_top-1] > v_st[v_top] ? 1 : 0);
+            v_top--;
+            break;
+        case '<':
+            if(v_top < 1) {
+                printf("< operation: missing operand\n");
+                return 0;
+            }
+            v_st[v_top-1] = (v_st[v_top-1] < v_st[v_top] ? 1 : 0);
+            v_top--;
+            break;
+        case GE:
+            if(v_top < 1) {
+                printf(">= operation: missing operand\n");
+                return 0;
+            }
+            v_st[v_top-1] = (v_st[v_top-1] >= v_st[v_top] ? 1 : 0);
+            v_top--;
+            break;
+        case LE:
+            if(v_top < 1) {
+                printf("<= operation: missing operand\n");
+                return 0;
+            }
+            v_st[v_top-1] = (v_st[v_top-1] <= v_st[v_top] ? 1 : 0);
+            v_top--;
+            break;
+        case EQ:
+            if(v_top < 1) {
+                printf("== operation: missing operand\n");
+                return 0;
+            }
+            v_st[v_top-1] = (v_st[v_top-1] == v_st[v_top] ? 1 : 0);
+            v_top--;
+            break;
+        case NE:
+            if(v_top < 1) {
+                printf("!= operation: missing operand\n");
+                return 0;
+            }
+            v_st[v_top-1] = (v_st[v_top-1] != v_st[v_top] ? 1 : 0);
+            v_top--;
+            break;
+        case LAN:
+            if(v_top < 1) {
+                printf("&& operation: missing operand\n");
+                return 0;
+            }
+            v_st[v_top-1] = (v_st[v_top-1] && v_st[v_top] ? 1 : 0);
+            v_top--;
+            break;
+        case LOR:
+            if(v_top < 1) {
+                printf("|| operation: missing operand\n");
+                return 0;
+            }
+            v_st[v_top-1] = (v_st[v_top-1] || v_st[v_top] ? 1 : 0);
+            v_top--;
+            break;
         default: printf("Unknown operator: %d\n", op); return 0;
     }
     return 1;
@@ -242,7 +313,7 @@ static int calc() {
                     }
                 }
             }
-            printf("get num: %d\n", value);
+            // printf("get num: %d\n", value);
             v_st[++v_top] = value;
         }
         else if(tokens[i].type == REG) {
@@ -265,7 +336,7 @@ static int calc() {
             }
             if(strcmp(tokens[i].str, "eip") == 0)
                 value = cpu.eip;
-            printf("get reg: %s  %d\n", tokens[i].str, value);
+            // printf("get register: %s  %d\n", tokens[i].str, value);
             v_st[++v_top] = value;
         }
         else if(tokens[i].type == '(') {
@@ -279,7 +350,7 @@ static int calc() {
                 }
             }
             if(op_top == 0) { // miss left (
-                printf("miss left parenthesis\n");
+                printf("Missing left parenthesis\n");
                 return 0;
             }
             if(op_top >= 0 && op_st[op_top] == '(') {
@@ -312,7 +383,6 @@ static int calc() {
         }
     }
     if(v_top != 0) {
-        printf("bad expression\n");
         return 0;
     }
     return v_st[0];

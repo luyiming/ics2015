@@ -144,7 +144,7 @@ static int cmd_x(char *args) {
     uint32_t t_addr = expr(arg, &success);
     for(i = 0; i < n; i ++)
     {
-        printf("%8x :\t0x%08x\t", t_addr + i, swaddr_read(t_addr + 4 * i, 4));
+        printf("%8x :\t0x%08x\t", t_addr + 4 * i, swaddr_read(t_addr + 4 * i, 4));
         int j;
         for(j = 0; j < 4; j ++) {
             printf("%02x ", swaddr_read(t_addr + 4 * i + j, 1));
@@ -159,10 +159,10 @@ static int cmd_p(char *args) {
         bool success = false;
         int value = expr(args, &success);
         if(success) {
-            printf("%d   0x%x\n", value, value);
+            printf("%d\t\t0x%x\n", value, value);
         }
         else
-            printf("bad expression\n");
+            printf("Bad expression\n");
     }
     return 0;
 }

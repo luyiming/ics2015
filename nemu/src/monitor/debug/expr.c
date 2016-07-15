@@ -461,6 +461,7 @@ static int eval(int p, int q) {
 int expr(char *e, bool *suc) {
 
     success = true;
+    v_top = -1, op_top = -1;
 
 	if(!make_token(e)) {
 		*suc = false;

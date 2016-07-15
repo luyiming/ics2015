@@ -162,22 +162,25 @@ static int calc_once(int op) {
     switch(op) {
         case NEG: 
             if(v_top < 0) {
+                printf("Negation: missing operand\n");
                 return 0;
             } 
             v_st[v_top] = - v_st[v_top]; 
             break;
         case DEREF: 
             if(v_top < 0) {
+                printf("Dereference operation: missing operand\n");
                 return 0;
             }
             if(v_st[v_top] < 0) {
-                printf("address out of range: 0x%x\t %d\n", v_st[v_top], v_st[v_top]);
+                printf("Address out of range: 0x%x\t %d\n", v_st[v_top], v_st[v_top]);
                 return 0;
             }
             v_st[v_top] = swaddr_read(v_st[v_top], 4); 
             break;
         case '*': 
             if(v_top < 1) {
+                printf("Multiplication: missing operand\n");
                 return 0;
             }
             v_st[v_top-1] = v_st[v_top-1] * v_st[v_top]; 
@@ -185,6 +188,7 @@ static int calc_once(int op) {
             break;
         case '/': 
             if(v_top < 1) {
+                printf("Division: missing operand\n");
                 return 0;
             }
             v_st[v_top-1] = v_st[v_top-1] / v_st[v_top]; 
@@ -192,6 +196,7 @@ static int calc_once(int op) {
             break;
         case '+': 
             if(v_top < 1) {
+                printf("Addition: missing operand\n");
                 return 0;
             }
             v_st[v_top-1] = v_st[v_top-1] + v_st[v_top]; 
@@ -199,12 +204,13 @@ static int calc_once(int op) {
             break;
         case '-': 
             if(v_top < 1) {
+                printf("Subtraction: missing operand\n");
                 return 0;
             }
             v_st[v_top-1] = v_st[v_top-1] - v_st[v_top]; 
             v_top--;
             break;
-        default: return 0;
+        default: printf("Unknown operator: %d\n", op); return 0;
     }
     return 1;
 }
@@ -234,6 +240,7 @@ static int calc() {
                     }
                 }
             }
+            printf("get num: %d\n", value);
             v_st[++v_top] = value;
         }
         else if(tokens[i].type == REG) {
@@ -256,6 +263,7 @@ static int calc() {
             }
             if(strcmp(tokens[i].str, "eip") == 0)
                 value = cpu.eip;
+            printf("get reg: %s  %d\n", tokens[i].str, value);
             v_st[++v_top] = value;
         }
         else if(tokens[i].type == '(') {
@@ -451,6 +459,8 @@ static int eval(int p, int q) {
 */
 
 int expr(char *e, bool *suc) {
+
+    success = true;
 
 	if(!make_token(e)) {
 		*suc = false;

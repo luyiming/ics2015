@@ -51,15 +51,17 @@ WP* new_wp() {
 bool free_wp(int number) {
     WP *p1, *p2;
     for(p1 = NULL, p2 = head; p2 != NULL; p1 = p2, p2 = p2->next) {
-        if(p2->NO == number) {
-            if(p2 == head)
-                head = head->next;
-            else
-                p1->next = p2;
-        }
+        if(p2->NO == number)
+            break;
     }
     if(p2 == NULL)
         return false;
+    if(p2->NO == number) {
+        if(p2 == head)
+            head = head->next;
+        else
+            p1->next = p2->next;
+    }
     p2->hit_times = 0;
     p2->next = free_;
     free_ = p2;

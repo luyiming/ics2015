@@ -292,7 +292,7 @@ static int calc() {
                 if(priority(op_st[op_top]) == priority(NEG) && priority(tokens[i].type) == priority(NEG))
                     op_st[++op_top] = tokens[i].type;
                 else {
-                    while(op_top > 0 && op_st[op_top] >= tokens[i].type) {
+                    while(op_top > 0 && priority(op_st[op_top]) >= priority(tokens[i].type)) {
                         if(calc_once(op_st[op_top--]) == 0) {
                             success = false;
                             return 0;

@@ -105,6 +105,7 @@ static bool make_token(char *e) {
                         tokens[nr_token].type = REG; 
                         strncpy(tokens[nr_token].str, substr_start + 1, substr_len - 1);
                         tokens[nr_token].str[substr_len] = '\0';
+                        printf("reg name: %s\n", tokens[nr_token].str);
                         nr_token++;
                         break;
                     }

@@ -38,6 +38,9 @@ static struct rule {
 	{ "<=",             LE },       // less eqaul
     { ">",              '>'},
     { "<",              '<'},
+    { "&",              '&'},
+    { "^",              '^'},
+    { "\\|",            '|'},
     { "\\(",            '('},
     { "\\)",            ')'},
 	{ "\\+",            '+'},
@@ -272,6 +275,30 @@ static int calc_once(int op) {
                 return 0;
             }
             v_st[v_top-1] = (v_st[v_top-1] != v_st[v_top] ? 1 : 0);
+            v_top--;
+            break;
+        case '&': 
+            if(v_top < 1) {
+                printf("& operation: missing operand\n");
+                return 0;
+            }
+            v_st[v_top-1] = v_st[v_top-1] & v_st[v_top]; 
+            v_top--;
+            break;
+        case '^': 
+            if(v_top < 1) {
+                printf("^ operation: missing operand\n");
+                return 0;
+            }
+            v_st[v_top-1] = v_st[v_top-1] ^ v_st[v_top]; 
+            v_top--;
+            break;
+        case '|': 
+            if(v_top < 1) {
+                printf("| operation: missing operand\n");
+                return 0;
+            }
+            v_st[v_top-1] = v_st[v_top-1] | v_st[v_top]; 
             v_top--;
             break;
         case LAN:

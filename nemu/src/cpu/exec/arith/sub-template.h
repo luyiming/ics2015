@@ -9,33 +9,37 @@ static void do_execute () {
     /*  Update EFLAGS. */
     Assert((DATA_TYPE)op_dest->val == op_dest->val, "sub op error");
     Assert((DATA_TYPE)op_src->val == op_src->val, "sub op error");
-    if((DATA_TYPE)op_dest->val == op_dest->val) {
-        printf("sub op right\n");
-    }
 
-    if(op_dest->val < op_src->val) {
-        cpu.CF = 1;
-        printf("sub carry\n");
-    }
-    else {
-        cpu.CF = 0;
-        printf("sub not carry\n");
-    }
-
+    cpu.CF = ((DATA_TYPE)op_dest->val < (DATA_TYPE)op_src->val ? 1 : 0);
     cpu.PF = get_parity(result);
     cpu.AF = 0;
     cpu.ZF = (result == 0 ? 1 : 0);
     cpu.SF = MSB(result);
 
-    if((DATA_TYPE_S)op_dest->val > 0 && (DATA_TYPE_S)op_src->val < 0 && (DATA_TYPE_S)result < 0) {
-        cpu.OF = 1;
-        printf("sub overflow\n");
-    }
-    else {
-        cpu.OF = 0;
-        printf("sub not overflow\n");
-    }
-
+    // CSAPP 2.74
+    /*
+    if (y == INT_MIN)
+	   return x >= 0;
+    int minus_y = -y;
+    int sum = x + minus_y;
+    int pos_over = !(x & INT_MIN) && !(minus_y & INT_MIN) && (sum & INT_MIN);
+    int neg_over = (x & INT_MIN) && (minus_y & INT_MIN) && !(sum & INT_MIN);
+    */
+    // int32_t x = op_dest->val;
+    // int32_t y = op_src->val;
+    // int32_t result = x - y
+    DATA_TYPE_S x = (DATA_TYPE)op_dest->val;
+    DATA_TYPE_S y = (DATA_TYPE)op_src->val;
+    int neg_over = x < 0 && y >= 0 && (DATA_TYPE_S)result >= 0;
+    int pos_over = x >= 0 && y < 0 && (DATA_TYPE_S)result < 0; // 0 - (-finity)
+    cpu.OF = neg_over || pos_over;
+/* add overflow
+    DATA_TYPE_S x = (DATA_TYPE)op_dest->val;
+    DATA_TYPE_S y = (DATA_TYPE)op_src->val;
+    int neg_over = x < 0 && y < 0 && (DATA_TYPE_S)result >= 0;
+    int pos_over = x >= 0 && y >= 0 && (DATA_TYPE_S)result < 0; // 0 - (-finity)
+    cpu.OF = neg_over || pos_over;
+*/
     print_asm_template2();
 }
 

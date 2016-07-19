@@ -32,4 +32,9 @@ extern char assembly[];
 #define print_asm_template3() \
 	print_asm(str(instr) str(SUFFIX) " %s,%s,%s", op_src->str, op_src2->str, op_dest->str)
 
+#define get_parity(n) \
+    (((n) & 0x1) + (((n) & 0x2) >> 1) + (((n) & 0x4) >> 2) + \
+    (((n) & 0x8) >> 3)+ (((n) & 0x16)>> 4) + (((n) & 0x32)>> 5) + \
+    (((n) & 0x64)>> 6) + (((n) & 0x128)>>7)) % 2
+
 #endif

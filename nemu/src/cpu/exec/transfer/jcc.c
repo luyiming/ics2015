@@ -134,7 +134,7 @@ make_helper(ja_w) {
     print_asm("ja 0x%x", (int32_t)cpu.eip + (int32_t)rel + 5);
     if(cpu.CF == 0 && cpu.ZF == 0)
         cpu.eip = (int32_t)cpu.eip + (int32_t)rel;
-	return 5; // prefix + opcode + disp
+	return 4; // opcode + disp (without prefix)
 }
 
 make_helper(jae_w) {
@@ -142,7 +142,7 @@ make_helper(jae_w) {
     print_asm("jae 0x%x", (int32_t)cpu.eip + (int32_t)rel + 5);
     if(cpu.CF == 0 || cpu.ZF == 1)
         cpu.eip = (int32_t)cpu.eip + (int32_t)rel;
-	return 5; // prefix + opcode + disp
+	return 4; // opcode + disp (without prefix)
 }
 
 make_helper(jb_w) {
@@ -150,7 +150,7 @@ make_helper(jb_w) {
     print_asm("jb 0x%x", (int32_t)cpu.eip + (int32_t)rel + 5);
     if(cpu.CF == 1 && cpu.ZF == 0)
         cpu.eip = (int32_t)cpu.eip + (int32_t)rel;
-	return 5; // prefix + opcode + disp
+	return 4; // opcode + disp (without prefix)
 }
 
 make_helper(jbe_w) {
@@ -158,7 +158,7 @@ make_helper(jbe_w) {
     print_asm("jbe 0x%x", (int32_t)cpu.eip + (int32_t)rel + 5);
     if(cpu.CF == 1 || cpu.ZF == 1)
         cpu.eip = (int32_t)cpu.eip + (int32_t)rel;
-	return 5; // prefix + opcode + disp
+	return 4; // opcode + disp (without prefix)
 }
 
 make_helper(je_w) {
@@ -166,7 +166,7 @@ make_helper(je_w) {
     print_asm("je 0x%x", (int32_t)cpu.eip + (int32_t)rel + 5);
     if(cpu.ZF == 1)
         cpu.eip = (int32_t)cpu.eip + (int32_t)rel;
-	return 5; // prefix + opcode + disp
+	return 4; // opcode + disp (without prefix)
 }
 
 make_helper(jne_w) {
@@ -174,7 +174,7 @@ make_helper(jne_w) {
     print_asm("jne 0x%x", (int32_t)cpu.eip + (int32_t)rel + 5);
     if(cpu.ZF == 0)
         cpu.eip = (int32_t)cpu.eip + (int32_t)rel;
-	return 5; // prefix + opcode + disp
+	return 4; // opcode + disp (without prefix)
 }
 
 make_helper(jg_w) {
@@ -182,7 +182,7 @@ make_helper(jg_w) {
     print_asm("jg 0x%x", (int32_t)cpu.eip + (int32_t)rel + 5);
     if(cpu.SF == cpu.OF && cpu.ZF == 0)
         cpu.eip = (int32_t)cpu.eip + (int32_t)rel;
-	return 5; // prefix + opcode + disp
+	return 4; // opcode + disp (without prefix)
 }
 
 make_helper(jge_w) {
@@ -190,7 +190,7 @@ make_helper(jge_w) {
     print_asm("jge 0x%x", (int32_t)cpu.eip + (int32_t)rel + 5);
     if(cpu.SF == cpu.OF || cpu.ZF == 1)
         cpu.eip = (int32_t)cpu.eip + (int32_t)rel;
-	return 5; // prefix + opcode + disp
+	return 4; // opcode + disp (without prefix)
 }
 
 make_helper(jl_w) {
@@ -198,7 +198,7 @@ make_helper(jl_w) {
     print_asm("jl 0x%x", (int32_t)cpu.eip + (int32_t)rel + 5);
     if(cpu.SF != cpu.OF && cpu.ZF == 0)
         cpu.eip = (int32_t)cpu.eip + (int32_t)rel;
-	return 5; // prefix + opcode + disp
+	return 4; // opcode + disp (without prefix)
 }
 
 make_helper(jle_w) {
@@ -206,7 +206,7 @@ make_helper(jle_w) {
     print_asm("jl 0x%x", (int32_t)cpu.eip + (int32_t)rel + 5);
     if(cpu.SF != cpu.OF || cpu.ZF == 1)
         cpu.eip = (int32_t)cpu.eip + (int32_t)rel;
-	return 5; // prefix + opcode + disp
+	return 4; // opcode + disp (without prefix)
 }
 
 make_helper(jno_w) {
@@ -214,7 +214,7 @@ make_helper(jno_w) {
     print_asm("jno 0x%x", (int32_t)cpu.eip + (int32_t)rel + 5);
     if(cpu.OF == 0)
         cpu.eip = (int32_t)cpu.eip + (int32_t)rel;
-	return 5; // prefix + opcode + disp
+	return 4; // opcode + disp (without prefix)
 }
 
 make_helper(jnp_w) {
@@ -222,7 +222,7 @@ make_helper(jnp_w) {
     print_asm("jnp 0x%x", (int32_t)cpu.eip + (int32_t)rel + 5);
     if(cpu.PF == 0)
         cpu.eip = (int32_t)cpu.eip + (int32_t)rel;
-	return 5; // prefix + opcode + disp
+	return 4; // opcode + disp (without prefix)
 }
 
 make_helper(jns_w) {
@@ -230,7 +230,7 @@ make_helper(jns_w) {
     print_asm("jns 0x%x", (int32_t)cpu.eip + (int32_t)rel + 5);
     if(cpu.SF == 0)
         cpu.eip = (int32_t)cpu.eip + (int32_t)rel;
-	return 5; // prefix + opcode + disp
+	return 4; // opcode + disp (without prefix)
 }
 
 make_helper(jo_w) {
@@ -238,7 +238,7 @@ make_helper(jo_w) {
     print_asm("jo 0x%x", (int32_t)cpu.eip + (int32_t)rel + 5);
     if(cpu.OF == 1)
         cpu.eip = (int32_t)cpu.eip + (int32_t)rel;
-	return 5; // prefix + opcode + disp
+	return 4; // opcode + disp (without prefix)
 }
 
 make_helper(jp_w) {
@@ -246,7 +246,7 @@ make_helper(jp_w) {
     print_asm("jp 0x%x", (int32_t)cpu.eip + (int32_t)rel + 5);
     if(cpu.PF == 1)
         cpu.eip = (int32_t)cpu.eip + (int32_t)rel;
-	return 5; // prefix + opcode + disp
+	return 4; // opcode + disp (without prefix)
 }
 
 make_helper(js_w) {
@@ -254,7 +254,7 @@ make_helper(js_w) {
     print_asm("js 0x%x", (int32_t)cpu.eip + (int32_t)rel + 5);
     if(cpu.SF == 1)
         cpu.eip = (int32_t)cpu.eip + (int32_t)rel;
-	return 5; // prefix + opcode + disp
+	return 4; // opcode + disp (without prefix)
 }
 
 /***************** disp 32 *********************/
@@ -263,7 +263,7 @@ make_helper(ja_l) {
     print_asm("ja 0x%x", (int32_t)cpu.eip + rel + 6);
     if(cpu.CF == 0 && cpu.ZF == 0)
         cpu.eip = (int32_t)cpu.eip + rel;
-	return 6; // opcode + disp
+	return 5; // opcode + disp (without prefix)
 }
 
 make_helper(jae_l) {
@@ -271,7 +271,7 @@ make_helper(jae_l) {
     print_asm("jae 0x%x", (int32_t)cpu.eip + rel + 6);
     if(cpu.CF == 0 || cpu.ZF == 1)
         cpu.eip = (int32_t)cpu.eip + rel;
-	return 6; // opcode + disp
+	return 5; // opcode + disp (without prefix)
 }
 
 make_helper(jb_l) {
@@ -279,7 +279,7 @@ make_helper(jb_l) {
     print_asm("jb 0x%x", (int32_t)cpu.eip + rel + 6);
     if(cpu.CF == 1 && cpu.ZF == 0)
         cpu.eip = (int32_t)cpu.eip + rel;
-	return 6; // opcode + disp
+	return 5; // opcode + disp (without prefix)
 }
 
 make_helper(jbe_l) {
@@ -287,7 +287,7 @@ make_helper(jbe_l) {
     print_asm("jbe 0x%x", (int32_t)cpu.eip + rel + 6);
     if(cpu.CF == 1 || cpu.ZF == 1)
         cpu.eip = (int32_t)cpu.eip + rel;
-	return 6; // opcode + disp
+	return 5; // opcode + disp (without prefix)
 }
 
 make_helper(je_l) {
@@ -295,7 +295,7 @@ make_helper(je_l) {
     print_asm("je 0x%x", (int32_t)cpu.eip + rel + 6);
     if(cpu.ZF == 1)
         cpu.eip = (int32_t)cpu.eip + rel;
-	return 6; // opcode + disp
+	return 5; // opcode + disp (without prefix)
 }
 
 make_helper(jne_l) {
@@ -303,7 +303,7 @@ make_helper(jne_l) {
     print_asm("jne 0x%x", (int32_t)cpu.eip + rel + 6);
     if(cpu.ZF == 0)
         cpu.eip = (int32_t)cpu.eip + rel;
-	return 6; // opcode + disp
+	return 5; // opcode + disp (without prefix)
 }
 
 make_helper(jg_l) {
@@ -311,7 +311,7 @@ make_helper(jg_l) {
     print_asm("jg 0x%x", (int32_t)cpu.eip + rel + 6);
     if(cpu.SF == cpu.OF && cpu.ZF == 0)
         cpu.eip = (int32_t)cpu.eip + rel;
-	return 6; // opcode + disp
+	return 5; // opcode + disp (without prefix)
 }
 
 make_helper(jge_l) {
@@ -319,7 +319,7 @@ make_helper(jge_l) {
     print_asm("jge 0x%x", (int32_t)cpu.eip + rel + 6);
     if(cpu.SF == cpu.OF || cpu.ZF == 1)
         cpu.eip = (int32_t)cpu.eip + rel;
-	return 6; // opcode + disp
+	return 5; // opcode + disp (without prefix)
 }
 
 make_helper(jl_l) {
@@ -327,7 +327,7 @@ make_helper(jl_l) {
     print_asm("jl 0x%x", (int32_t)cpu.eip + rel + 6);
     if(cpu.SF != cpu.OF && cpu.ZF == 0)
         cpu.eip = (int32_t)cpu.eip + rel;
-	return 6; // opcode + disp
+	return 5; // opcode + disp (without prefix)
 }
 
 make_helper(jle_l) {
@@ -335,7 +335,7 @@ make_helper(jle_l) {
     print_asm("jl 0x%x", (int32_t)cpu.eip + rel + 6);
     if(cpu.SF != cpu.OF || cpu.ZF == 1)
         cpu.eip = (int32_t)cpu.eip + rel;
-	return 6; // opcode + disp
+	return 5; // opcode + disp (without prefix)
 }
 
 make_helper(jno_l) {
@@ -343,7 +343,7 @@ make_helper(jno_l) {
     print_asm("jno 0x%x", (int32_t)cpu.eip + rel + 6);
     if(cpu.OF == 0)
         cpu.eip = (int32_t)cpu.eip + rel;
-	return 6; // opcode + disp
+	return 5; // opcode + disp (without prefix)
 }
 
 make_helper(jnp_l) {
@@ -351,7 +351,7 @@ make_helper(jnp_l) {
     print_asm("jnp 0x%x", (int32_t)cpu.eip + rel + 6);
     if(cpu.PF == 0)
         cpu.eip = (int32_t)cpu.eip + rel;
-	return 6; // opcode + disp
+	return 5; // opcode + disp (without prefix)
 }
 
 make_helper(jns_l) {
@@ -359,7 +359,7 @@ make_helper(jns_l) {
     print_asm("jns 0x%x", (int32_t)cpu.eip + rel + 6);
     if(cpu.SF == 0)
         cpu.eip = (int32_t)cpu.eip + rel;
-	return 6; // opcode + disp
+	return 5; // opcode + disp (without prefix)
 }
 
 make_helper(jo_l) {
@@ -367,7 +367,7 @@ make_helper(jo_l) {
     print_asm("jo 0x%x", (int32_t)cpu.eip + rel + 6);
     if(cpu.OF == 1)
         cpu.eip = (int32_t)cpu.eip + rel;
-	return 6; // opcode + disp
+	return 5; // opcode + disp (without prefix)
 }
 
 make_helper(jp_l) {
@@ -375,7 +375,7 @@ make_helper(jp_l) {
     print_asm("jp 0x%x", (int32_t)cpu.eip + rel + 6);
     if(cpu.PF == 1)
         cpu.eip = (int32_t)cpu.eip + rel;
-	return 6; // opcode + disp
+	return 5; // opcode + disp (without prefix)
 }
 
 make_helper(js_l) {
@@ -383,7 +383,7 @@ make_helper(js_l) {
     print_asm("js 0x%x", (int32_t)cpu.eip + rel + 6);
     if(cpu.SF == 1)
         cpu.eip = (int32_t)cpu.eip + rel;
-	return 6; // opcode + disp
+	return 5; // opcode + disp (without prefix)
 }
 
 /***************** helper v *********************/

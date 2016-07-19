@@ -16,10 +16,14 @@ make_helper(cmps_b) {
     int pos_over = x >= 0 && y < 0 && zs < 0;
     cpu.OF = neg_over || pos_over;
 
-    if(cpu.DF == 0)
+    if(cpu.DF == 0) {
+        reg_l(R_ESI) += 1;
         reg_l(R_EDI) += 1;
-    else
+    }
+    else {
+        reg_l(R_ESI) -= 1;
         reg_l(R_EDI) -= 1;
+    }
     print_asm("cmpsb");
     return 1;
 }
@@ -40,10 +44,14 @@ make_helper(cmps_w) {
     int pos_over = x >= 0 && y < 0 && zs < 0;
     cpu.OF = neg_over || pos_over;
 
-    if(cpu.DF == 0)
+    if(cpu.DF == 0) {
+        reg_l(R_ESI) += 2;
         reg_l(R_EDI) += 2;
-    else
+    }
+    else {
+        reg_l(R_ESI) -= 2;
         reg_l(R_EDI) -= 2;
+    }
     print_asm("cmpsw");
     return 1;
 }
@@ -64,10 +72,14 @@ make_helper(cmps_l) {
     int pos_over = x >= 0 && y < 0 && zs < 0;
     cpu.OF = neg_over || pos_over;
 
-    if(cpu.DF == 0)
+    if(cpu.DF == 0) {
+        reg_l(R_ESI) += 4;
         reg_l(R_EDI) += 4;
-    else
+    }
+    else {
+        reg_l(R_ESI) -= 4;
         reg_l(R_EDI) -= 4;
+    }
     print_asm("cmpsl");
     return 1;
 }

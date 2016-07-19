@@ -1,17 +1,17 @@
 #include "cpu/exec/helper.h"
 
-make_helper(jmp_rel8) {
-	int8_t rel = instr_fetch(eip + 1, 1);
-    cpu.eip = (int32_t)cpu.eip + (int32_t)rel;
+#define DATA_BYTE 1
+#include "jmp-template.h"
+#undef DATA_BYTE
 
-    print_asm("jmp %x", cpu.eip + 2);
-	return 2;
-}
+#define DATA_BYTE 2
+#include "jmp-template.h"
+#undef DATA_BYTE
 
-make_helper(jmp_rel16) {
-	int16_t rel = instr_fetch(eip + 1, 2);
-    cpu.eip = (int32_t)cpu.eip + (int32_t)rel;
+#define DATA_BYTE 4
+#include "jmp-template.h"
+#undef DATA_BYTE
 
-    print_asm("jmp %x", cpu.eip + 3);
-	return 3;
-}
+/* for instruction encoding overloading */
+make_helper_v(jmp_i)
+make_helper_v(jmp_rm)

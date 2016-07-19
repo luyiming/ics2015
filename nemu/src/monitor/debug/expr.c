@@ -29,9 +29,9 @@ static struct rule {
 	{ " +",	            NOTYPE },   // spaces
 	{ "==",             EQ },       // equal
 	{ "!=",             NE },       // not equal
-    { "(0x)?[0-9]+",    NUM },      // number
+    { "(0x)?[0-9a-f]+", NUM },      // number
     { "\\$[a-zA-Z]+",   REG },      // register
-    { "[a-zA-Z]+",  VAR },          // variable
+    { "[a-zA-Z]+",      VAR },          // variable
 	{ "&&",             LAN },      // logical and
 	{ "\\|\\|",         LOR },      // logical or
 	{ "<<",             SHL },      // shift left
@@ -87,7 +87,7 @@ static bool make_token(char *e) {
 	int position = 0;
 	int i;
 	regmatch_t pmatch;
-	
+
 	nr_token = 0;
 
 	while(e[position] != '\0') {
@@ -101,7 +101,7 @@ static bool make_token(char *e) {
 				position += substr_len;
 
 				/* TODO: Now a new token is recognized with rules[i]. Add codes
-				 * to record the token in the array ``tokens''. For certain 
+				 * to record the token in the array ``tokens''. For certain
 				 * types of tokens, some extra actions should be performed.
 				 */
                 Assert(nr_token < 64, "tokens out of range");
@@ -109,7 +109,7 @@ static bool make_token(char *e) {
 				switch(rules[i].token_type) {
                     case NUM:
                     {
-                        tokens[nr_token].type = NUM; 
+                        tokens[nr_token].type = NUM;
                         strncpy(tokens[nr_token].str, substr_start, substr_len);
                         tokens[nr_token].str[substr_len] = '\0';
                         // printf("num: %s\n", tokens[nr_token].str);
@@ -118,7 +118,7 @@ static bool make_token(char *e) {
                     }
                     case REG:   //remove prefix $
                     {
-                        tokens[nr_token].type = REG; 
+                        tokens[nr_token].type = REG;
                         strncpy(tokens[nr_token].str, substr_start + 1, substr_len - 1);
                         tokens[nr_token].str[substr_len - 1] = '\0';
                         // printf("reg name: %s\n", tokens[nr_token].str);
@@ -152,7 +152,7 @@ static bool make_token(char *e) {
             tokens[i].type = NOP;
         }
     }
-	return true; 
+	return true;
 }
 
 static int priority(int tk) {
@@ -186,14 +186,14 @@ static int calc_once(int op) {
     switch(op) {
         case NOP:
             break;
-        case NEG: 
+        case NEG:
             if(v_top < 0) {
                 printf("Negation: missing operand\n");
                 return 0;
-            } 
-            v_st[v_top] = - v_st[v_top]; 
+            }
+            v_st[v_top] = - v_st[v_top];
             break;
-        case DEREF: 
+        case DEREF:
             if(v_top < 0) {
                 printf("Dereference operation: missing operand\n");
                 return 0;
@@ -202,76 +202,76 @@ static int calc_once(int op) {
                 printf("Address out of range: 0x%x\t %d\n", v_st[v_top], v_st[v_top]);
                 return 0;
             }
-            v_st[v_top] = swaddr_read(v_st[v_top], 4); 
+            v_st[v_top] = swaddr_read(v_st[v_top], 4);
             break;
-        case '!': 
+        case '!':
             if(v_top < 0) {
                 printf("! operation: missing operand\n");
                 return 0;
-            } 
-            v_st[v_top] = ! v_st[v_top]; 
+            }
+            v_st[v_top] = ! v_st[v_top];
             break;
-        case '~': 
+        case '~':
             if(v_top < 0) {
                 printf("~ operation: missing operand\n");
                 return 0;
-            } 
-            v_st[v_top] = ~ v_st[v_top]; 
+            }
+            v_st[v_top] = ~ v_st[v_top];
             break;
-        case '*': 
+        case '*':
             if(v_top < 1) {
                 printf("Multiplication: missing operand\n");
                 return 0;
             }
-            v_st[v_top-1] = v_st[v_top-1] * v_st[v_top]; 
+            v_st[v_top-1] = v_st[v_top-1] * v_st[v_top];
             v_top--;
             break;
-        case '/': 
+        case '/':
             if(v_top < 1) {
                 printf("Division: missing operand\n");
                 return 0;
             }
-            v_st[v_top-1] = v_st[v_top-1] / v_st[v_top]; 
+            v_st[v_top-1] = v_st[v_top-1] / v_st[v_top];
             v_top--;
             break;
-        case '%': 
+        case '%':
             if(v_top < 1) {
                 printf("Modulo operation: missing operand\n");
                 return 0;
             }
-            v_st[v_top-1] = v_st[v_top-1] % v_st[v_top]; 
+            v_st[v_top-1] = v_st[v_top-1] % v_st[v_top];
             v_top--;
             break;
-        case '+': 
+        case '+':
             if(v_top < 1) {
                 printf("Addition: missing operand\n");
                 return 0;
             }
-            v_st[v_top-1] = v_st[v_top-1] + v_st[v_top]; 
+            v_st[v_top-1] = v_st[v_top-1] + v_st[v_top];
             v_top--;
             break;
-        case '-': 
+        case '-':
             if(v_top < 1) {
                 printf("Subtraction: missing operand\n");
                 return 0;
             }
-            v_st[v_top-1] = v_st[v_top-1] - v_st[v_top]; 
+            v_st[v_top-1] = v_st[v_top-1] - v_st[v_top];
             v_top--;
             break;
-        case SHL: 
+        case SHL:
             if(v_top < 1) {
                 printf("<< operation: missing operand\n");
                 return 0;
             }
-            v_st[v_top-1] = v_st[v_top-1] << v_st[v_top]; 
+            v_st[v_top-1] = v_st[v_top-1] << v_st[v_top];
             v_top--;
             break;
-        case SHR: 
+        case SHR:
             if(v_top < 1) {
                 printf(">> operation: missing operand\n");
                 return 0;
             }
-            v_st[v_top-1] = v_st[v_top-1] >> v_st[v_top]; 
+            v_st[v_top-1] = v_st[v_top-1] >> v_st[v_top];
             v_top--;
             break;
         case '>':
@@ -322,28 +322,28 @@ static int calc_once(int op) {
             v_st[v_top-1] = (v_st[v_top-1] != v_st[v_top] ? 1 : 0);
             v_top--;
             break;
-        case '&': 
+        case '&':
             if(v_top < 1) {
                 printf("& operation: missing operand\n");
                 return 0;
             }
-            v_st[v_top-1] = v_st[v_top-1] & v_st[v_top]; 
+            v_st[v_top-1] = v_st[v_top-1] & v_st[v_top];
             v_top--;
             break;
-        case '^': 
+        case '^':
             if(v_top < 1) {
                 printf("^ operation: missing operand\n");
                 return 0;
             }
-            v_st[v_top-1] = v_st[v_top-1] ^ v_st[v_top]; 
+            v_st[v_top-1] = v_st[v_top-1] ^ v_st[v_top];
             v_top--;
             break;
-        case '|': 
+        case '|':
             if(v_top < 1) {
                 printf("| operation: missing operand\n");
                 return 0;
             }
-            v_st[v_top-1] = v_st[v_top-1] | v_st[v_top]; 
+            v_st[v_top-1] = v_st[v_top-1] | v_st[v_top];
             v_top--;
             break;
         case LAN:
@@ -513,12 +513,12 @@ static bool op_less_equal(int pt, int qt) {
 
 static int eval(int p, int q) {
     if(p > q) {
-//                Bad expression 
+//                Bad expression
         return 0;
     }
-    else if(p == q) { 
+    else if(p == q) {
     // Single token.
-    //       * For now this token should be a number. 
+    //       * For now this token should be a number.
     //               * Return the value of the number.
         if(tokens[p].type == NUM) {
             int value = 0;
@@ -528,13 +528,13 @@ static int eval(int p, int q) {
                     int tmp = tokens[p].str[i] - '0';
                     if(tmp > 9 || tmp < 0)
                         tmp = tokens[p].str[i] - 'a' + 10;
-                    value = value * 16 + tmp; 
+                    value = value * 16 + tmp;
                 }
-            }   
+            }
             else { // Dec
                 int i, len = strlen(tokens[p].str);
                 for(i = 0; i < len; i ++) {
-                    value = value * 10 + tokens[p].str[i] - '0'; 
+                    value = value * 10 + tokens[p].str[i] - '0';
                 }
             }
             return value;
@@ -569,9 +569,9 @@ static int eval(int p, int q) {
             return 0;
     }
     else if(check_parentheses(p, q) == 0) {
-    // The expression is surrounded by a matched pair of parentheses. 
+    // The expression is surrounded by a matched pair of parentheses.
     //       * If that is the case, just throw away the parentheses.
-        return eval(p + 1, q - 1); 
+        return eval(p + 1, q - 1);
     }
     else {
         int i, in_bracket = 0;
@@ -628,4 +628,3 @@ int expr(char *e, bool *suc) {
     *suc = success;
     return value;
 }
-

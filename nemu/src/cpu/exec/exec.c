@@ -233,8 +233,12 @@ make_helper(exec) {
 }
 
 static make_helper(_2byte_esc) {
-	eip ++;
+	printf("eip 0x%x\n", eip);
+	eip ++;		// Whay eip ++ ?
 	uint32_t opcode = instr_fetch(eip, 1);
 	ops_decoded.opcode = opcode | 0x100;
-	return _2byte_opcode_table[opcode](eip) + 1;
+
+	int l = _2byte_opcode_table[opcode](eip);
+	printf("return %d\n", l + 1);
+	return l + 1;
 }

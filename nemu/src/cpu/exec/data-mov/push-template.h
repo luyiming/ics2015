@@ -5,7 +5,7 @@
 
 
 #if DATA_BYTE == 1
-
+// push imm8 stores 4 bytes
 static void do_execute () {
     cpu.esp -= 4;
     swaddr_write(cpu.esp, 4, op_src->val);

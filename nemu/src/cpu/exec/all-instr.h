@@ -41,8 +41,8 @@
 #include "string/movs.h"
 #include "string/stos.h"
 #include "string/cmps.h"
-#include "string/std.h"
-#include "string/cld.h"
+
+#include "flag-ctrl/flag-ctrl.h"
 
 #include "misc/misc.h"
 

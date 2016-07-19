@@ -23,7 +23,15 @@ static void do_execute () {
 
     print_asm_template1();
 }
+/*
+make_helper(concat(push_m_, SUFFIX)) {
+	int len = concat(decode_rm_, SUFFIX)(eip + 1);
+	do_execute();
+	return len + 1;
+}
+*/
 
+make_instr_helper(rm)
 make_instr_helper(r)
 #endif
 

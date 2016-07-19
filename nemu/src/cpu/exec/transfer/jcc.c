@@ -74,7 +74,7 @@ make_helper(jl_b) {
 
 make_helper(jle_b) {
 	int8_t rel = instr_fetch(eip + 1, 1);
-    print_asm("jl 0x%x", (int32_t)cpu.eip + (int32_t)rel + 2);
+    print_asm("jle 0x%x", (int32_t)cpu.eip + (int32_t)rel + 2);
     if(cpu.SF != cpu.OF || cpu.ZF == 1)
         cpu.eip = (int32_t)cpu.eip + (int32_t)rel;
 	return 2;

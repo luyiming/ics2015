@@ -19,6 +19,10 @@ int get_symbol_value(const char * str) {
 			printf("STB_GLOBAL %x\n", STB_GLOBAL);
 			printf("STB_LOCAL %x\n", STB_LOCAL);
 			printf("STT_NOTYPE %x\n", STT_NOTYPE);
+			printf("STB_WEAK %x\n", STB_WEAK);
+			printf("STT_LOPROC %x\n", STT_LOPROC);
+			printf("STT_HIPROC %x\n", STT_HIPROC);
+			printf("STB_WEAK %x\n", STB_WEAK);
 			printf("symtab[j].st_info %x\n", symtab[j].st_info);
 			return symtab[j].st_value;
 		}

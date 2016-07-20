@@ -225,7 +225,7 @@ static int cmd_bt(char *args) {
 	do {
 		int i;
 		for(i = 0; i < 4; i ++) {
-			args[i] = swaddr_read(cur_ebp + 8 + 4 * i, 4);
+			func_args[i] = swaddr_read(cur_ebp + 8 + 4 * i, 4);
 		}
 		if(cnt == 0)
 			func_name = get_symbol_name(cpu.eip);

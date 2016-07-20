@@ -217,17 +217,20 @@ static int cmd_d(char *args) {
 
 static int cmd_bt(char *args) {
 	uint32_t cur_ebp = cpu.ebp;
-	uint32_t prev_ebp;
-	swaddr_t ret_addr;
+	uint32_t prev_ebp = 0;
+	swaddr_t ret_addr = 0;
 	uint32_t func_args[4] = {0};
 	char* func_name;
 	int cnt = 0;
-	while((prev_ebp = swaddr_read(cur_ebp, 4)) != 0) {
+	do {
 		int i;
 		for(i = 0; i < 4; i ++) {
 			args[i] = swaddr_read(cur_ebp + 8 + 4 * i, 4);
 		}
-		func_name = get_symbol_name(cur_ebp);
+		if(cnt == 0)
+			func_name = get_symbol_name(cpu.eip);
+		else
+			func_name = get_symbol_name(ret_addr);
 		if(cnt == 0)
 			printf("#%d  %s (%x, %x, %x, %x)\n", cnt, func_name, func_args[0], func_args[1], func_args[2], func_args[3]);
 		else
@@ -235,7 +238,7 @@ static int cmd_bt(char *args) {
 		cur_ebp = prev_ebp;
 		cnt++;
 		ret_addr = swaddr_read(cur_ebp + 4, 4);
-	}
+	} while((prev_ebp = swaddr_read(cur_ebp, 4)) != 0);
     return 0;
 }
 

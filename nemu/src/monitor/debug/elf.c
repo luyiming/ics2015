@@ -30,6 +30,19 @@ int get_symbol_value(const char * str) {
 	}
 	return -1;
 }
+
+char* get_symbol_name(uint32_t addr) {
+	int j;
+	for(j = 0; j < nr_symtab_entry; j++) {
+		if(/*symtab[j].st_info == 16
+			&& */addr >= symtab[j].st_value
+			&& addr < symtab[j].st_value + symtab[j].st_size) {
+			return strtab + symtab[j].st_name;
+		}
+	}
+	return 0;
+}
+
 void load_elf_tables(int argc, char *argv[]) {
 	int ret;
 	Assert(argc == 2, "run NEMU with format 'nemu [program]'");

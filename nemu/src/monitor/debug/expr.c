@@ -409,7 +409,7 @@ static int calc() {
 			int value = get_symbol_value(tokens[i].str);
 			if(value == -1) {
 				success = false;
-				printf("cannot find symbol %s\n", tokens[i].str);
+				printf("cannot find symbol: %s\n", tokens[i].str);
 				return 0;
 			}
 			else

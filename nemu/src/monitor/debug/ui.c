@@ -217,7 +217,6 @@ static int cmd_d(char *args) {
 
 static int cmd_bt(char *args) {
 	uint32_t cur_ebp = cpu.ebp;
-	uint32_t prev_ebp = 0;
 	swaddr_t ret_addr = 0;
 	uint32_t func_args[4] = {0};
 	char* func_name;
@@ -235,10 +234,10 @@ static int cmd_bt(char *args) {
 			printf("#%d  %s (%x, %x, %x, %x)\n", cnt, func_name, func_args[0], func_args[1], func_args[2], func_args[3]);
 		else
 			printf("#%d  0x%x in %s (%x, %x, %x, %x)\n", cnt, ret_addr, func_name, func_args[0], func_args[1], func_args[2], func_args[3]);
-		cur_ebp = prev_ebp;
+		cur_ebp = swaddr_read(cur_ebp, 4);
 		cnt++;
 		ret_addr = swaddr_read(cur_ebp + 4, 4);
-	} while((prev_ebp = swaddr_read(cur_ebp, 4)) != 0);
+	} while(cur_ebp != 0);
     return 0;
 }
 

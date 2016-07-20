@@ -11,19 +11,20 @@ static int nr_symtab_entry;
 int get_symbol_value(const char * str) {
 	int j;
 	for(j = 0; j < nr_symtab_entry; j++) {
-		if(strcmp(str, strtab + symtab[j].st_name) == 0) {
-			printf("STT_OBJECT %x\n", STT_OBJECT);
-			printf("STT_FUNC %x\n", STT_FUNC);
-			printf("STT_SECTION %x\n", STT_SECTION);
-			printf("STT_FILE %x\n", STT_FILE);
-			printf("STB_GLOBAL %x\n", STB_GLOBAL);
-			printf("STB_LOCAL %x\n", STB_LOCAL);
-			printf("STT_NOTYPE %x\n", STT_NOTYPE);
-			printf("STB_WEAK %x\n", STB_WEAK);
-			printf("STT_LOPROC %x\n", STT_LOPROC);
-			printf("STT_HIPROC %x\n", STT_HIPROC);
-			printf("STB_WEAK %x\n", STB_WEAK);
-			printf("symtab[j].st_info %x\n", symtab[j].st_info);
+		if(symtab[j].st_info == 17 && strcmp(str, strtab + symtab[j].st_name) == 0) {
+			/*
+			STT_OBJECT 1
+			STT_FUNC 2
+			STT_SECTION 3
+			STT_FILE 4
+			STB_GLOBAL 1
+			STB_LOCAL 0
+			STT_NOTYPE 0
+			STB_WEAK 2
+			STT_LOPROC 13
+			STT_HIPROC 15
+			STB_WEAK 2
+			*/
 			return symtab[j].st_value;
 		}
 	}

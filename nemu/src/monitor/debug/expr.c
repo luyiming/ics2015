@@ -6,6 +6,8 @@
 #include <sys/types.h>
 #include <regex.h>
 
+extern int get_symbol_value(const char *);
+
 enum {
 	NOTYPE = 256, NUM, REG, VAR, LOR, LAN, EQ, NE, LE, GE, SHL, SHR, NEG, DEREF, NOP
 };
@@ -31,7 +33,7 @@ static struct rule {
 	{ "!=",             NE },       // not equal
     { "(0x)?[0-9a-f]+", NUM },      // number
     { "\\$[a-zA-Z]+",   REG },      // register
-    { "[a-zA-Z]+",      VAR },          // variable
+    { "[a-zA-Z_]+",     VAR },      // variable
 	{ "&&",             LAN },      // logical and
 	{ "\\|\\|",         LOR },      // logical or
 	{ "<<",             SHL },      // shift left
@@ -395,6 +397,16 @@ static int calc() {
             // printf("get num: %d\n", value);
             v_st[++v_top] = value;
         }
+		else if(tokens[i].type == VAR) {
+			int value = get_symbol_value(tokens[i].str);
+			if(value == -1) {
+				success = false;
+				printf("cannot find symbol %s\n", tokens[i].str);
+				return 0;
+			}
+			else
+				v_st[++v_top] = value;
+		}
         else if(tokens[i].type == REG) {
             int value = 0;
             int j;

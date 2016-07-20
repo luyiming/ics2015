@@ -11,7 +11,7 @@ static int nr_symtab_entry;
 int get_symbol_value(const char * str) {
 	int j;
 	for(j = 0; j < nr_symtab_entry; j++) {
-		if(strcmp(str, strtab + symtab[j].st_name) == 0) {
+		if(symtab[j].st_info == STT_OBJECT && strcmp(str, strtab + symtab[j].st_name) == 0) {
 			return symtab[j].st_value;
 		}
 	}
